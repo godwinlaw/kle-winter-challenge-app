@@ -8,12 +8,14 @@ This mobile application (iOS & Android) keeps score and manages tasks for the Kl
 1. Install flutter: https://flutter.dev/docs/get-started/install
 2. Setup editor (VS Code or IntelliJ): https://flutter.dev/docs/get-started/editor?tab=vscode
 3. Join [Trello board](https://trello.com/invite/b/vVtNtz68/6c19f5c9c3c5ab3d8e3ce2865ad37596/klesis-winter-challenge).
-4. 
+4. Clone this repo to your local machine. Instructions here: https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository
 
 ## Links
 [Trello board](https://trello.com/b/vVtNtz68/klesis-winter-challenge)
 
 [Designs (WIP)](https://www.figma.com/file/yknxarbabVvBScc0Qc4Hju/Klesis-Winter-Challenge?node-id=1%3A2)
+
+[Winter Challenge Google Sheet](https://docs.google.com/spreadsheets/u/1/d/1UuLdGUT91CTy6u11K8Q1L1At_RJ7Fo5Lpyr2Audu48U/edit?usp=drive_web&ouid=100650900017863898680)
 
 ## Resources
 A few official resources to get you started if this is your first Flutter project:
