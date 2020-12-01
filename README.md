@@ -7,6 +7,8 @@ This mobile application (iOS & Android) keeps score and manages tasks for the Kl
 
 1. Install flutter: https://flutter.dev/docs/get-started/install
 2. Setup editor (VS Code or IntelliJ): https://flutter.dev/docs/get-started/editor?tab=vscode
+3. Join [Trello board](https://trello.com/invite/b/vVtNtz68/6c19f5c9c3c5ab3d8e3ce2865ad37596/klesis-winter-challenge).
+4. 
 
 ## Links
 [Trello board](https://trello.com/b/vVtNtz68/klesis-winter-challenge)
