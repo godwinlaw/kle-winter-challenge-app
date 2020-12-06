@@ -5,9 +5,7 @@ void main() {
   runApp(WinterChallengeApp());
 }
 
-/**
- * The entry point for bootstrapping the entire app.
- */
+/// The entry point for bootstrapping the entire app.
 class WinterChallengeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
