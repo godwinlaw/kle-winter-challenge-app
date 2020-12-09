@@ -13,14 +13,14 @@ This mobile application (iOS & Android) keeps score and manages tasks for the Kl
 
 ## Submitting Code
 To push code to the github repo, please follow these steps:
-1. On your local machine, create a new branch with these naming conventions:
+1. On your local machine, create a new branch with these naming conventions:    
 `git checkout -b <author-initials>_<type: feature|bug>_<brief-description>`
-2. Add and commit your files in that branch.
-`git add -A`
-`git commit -m "Brief description of code"`
-3. Push the branch to Github.
-`git push -u origin <name-of-branch-from-step-1>`
-4. On Github, the Compare & pull request button should appear. Click on it to create a new pull request.
+2. Add and commit your files in that branch.    
+`git add -A`       
+`git commit -m "Brief description of code"`    
+3. Push the branch to Github.    
+`git push -u origin <name-of-branch-from-step-1>`    
+4. On Github, the Compare & pull request button should appear. Click on it to create a new pull request.    
 
 For more, visit this [tutorial](https://opensource.com/article/19/7/create-pull-request-github)
 ## Links
