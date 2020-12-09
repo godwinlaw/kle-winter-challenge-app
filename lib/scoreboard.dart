@@ -213,9 +213,8 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
 
   Container genderTile(String gender, int points) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
-        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           genderLogo(" " + gender.substring(0, 1) + " "),
           Text(
@@ -231,7 +230,11 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
             textScaleFactor: 0.5,
           ),
           Text(points.toString(),
-              textScaleFactor: 1.5, style: TextStyle(color: Colors.grey[700]))
+              textScaleFactor: 1.5, style: TextStyle(color: Colors.grey[700])),
+          Text(
+            " ",
+            textScaleFactor: 10,
+          ),
         ],
       ),
     );
@@ -242,10 +245,10 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     List<String> gender = data.elementAt(0);
     List<int> points = data.elementAt(1);
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 120.0, horizontal: 20),
+      //padding: EdgeInsets.symmetric(vertical: 120.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           genderTile(gender.elementAt(0), points.elementAt(0)),
           genderTile(gender.elementAt(1), points.elementAt(1))
