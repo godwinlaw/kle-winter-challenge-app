@@ -22,7 +22,7 @@ To push code to the github repo, please follow these steps:
 `git push -u origin <name-of-branch-from-step-1>`    
 4. On Github, the Compare & pull request button should appear. Click on it to create a new pull request.    
 
-For more, visit this [tutorial](https://opensource.com/article/19/7/create-pull-request-github)
+For more, visit this [tutorial](https://opensource.com/article/19/7/create-pull-request-github).
 ## Links
 [Trello board](https://trello.com/b/vVtNtz68/klesis-winter-challenge)
 
