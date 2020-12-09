@@ -11,6 +11,18 @@ This mobile application (iOS & Android) keeps score and manages tasks for the Kl
 4. Clone this repo to your local machine. Instructions here: https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository
 5. (OPTIONAL) Go through [the tutorial](https://flutter.dev/docs/get-started/codelab) to write your first Flutter App.
 
+## Submitting Code
+To push code to the github repo, please follow these steps:
+1. On your local machine, create a new branch with these naming conventions (e.g. gl_feature_log-screen-ux-elements):    
+`git checkout -b <author-initials>_<type: feature|bug>_<brief-description>`
+2. Add and commit your files in that branch.    
+`git add -A`       
+`git commit -m "Brief description of code"`    
+3. Push the branch to Github.    
+`git push -u origin <name-of-branch-from-step-1>`    
+4. On Github, the Compare & pull request button should appear. Click on it to create a new pull request.    
+
+For more, visit this [tutorial](https://opensource.com/article/19/7/create-pull-request-github).
 ## Links
 [Trello board](https://trello.com/b/vVtNtz68/klesis-winter-challenge)
 
