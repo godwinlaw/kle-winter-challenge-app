@@ -13,7 +13,7 @@ This mobile application (iOS & Android) keeps score and manages tasks for the Kl
 
 ## Submitting Code
 To push code to the github repo, please follow these steps:
-1. On your local machine, create a new branch with these naming conventions:    
+1. On your local machine, create a new branch with these naming conventions (e.g. gl_feature_log-screen-ux-elements):    
 `git checkout -b <author-initials>_<type: feature|bug>_<brief-description>`
 2. Add and commit your files in that branch.    
 `git add -A`       
