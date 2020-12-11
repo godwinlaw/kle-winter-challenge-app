@@ -1,4 +1,4 @@
-package com.example.kle_winter_challenge
+package com.klesis.winterchallenge
 
 import io.flutter.embedding.android.FlutterActivity
 
