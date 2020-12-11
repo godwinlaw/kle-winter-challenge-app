@@ -1,9 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'scoreboard.dart';
 import 'log.dart';
 import 'profile.dart';
 
 class Home extends StatefulWidget {
+  // Used to access user information
+  final FirebaseUser user;
+
+  Home(this.user);
+
   @override
   State<StatefulWidget> createState() {
     return _HomeState();
