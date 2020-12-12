@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 /// Screen for viewing user profile and all their commitments.
 ///
 /// Owners: Ashley Alvarez, Christy Koh, Chloe Chan
-///
 
 class ProfileWidget extends StatefulWidget {
   @override
@@ -14,10 +13,14 @@ class ProfileWidget extends StatefulWidget {
 
 class _ProfileWidgetState extends State<ProfileWidget> {
   String name;
-  String servantHood;
-  String picturePath;
   bool isBrother;
+  String picturePath;
+
+  String servanthood;
+  bool isEditingServanthood;
+
   List<String> prayerList;
+  bool isEditingPrayer;
 
   @override
   void initState() {
@@ -30,23 +33,57 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     } else {
       picturePath = "images/default_woman.jpeg";
     }
-    servantHood = "";
-    prayerList = [];
+
+    servanthood = "Code the winter challenge app";
+    prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
+    isEditingServanthood = false;
+    isEditingPrayer = false;
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Profile')),
-        body: Column(children: [
-          _profilePic(picturePath),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          EditableContainer()
-        ]),
+        body: Container(
+            margin: const EdgeInsets.only(left: 20.0, right: 20.0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _profilePic(picturePath),
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+                  ),
+                  Card(
+                      child: Column(
+                    children: [
+                      ListTile(
+                          title: Text('Memory Verse'),
+                          trailing: IconButton(
+                            icon: Icon(Icons.arrow_forward_ios_rounded),
+                            onPressed: () {},
+                          )),
+                      Divider(),
+                      ListTile(
+                        title: Text('Servanthood'),
+                        subtitle:
+                            Text("TODO make this an editable text widget"),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            setState(() {
+                              isEditingServanthood = !isEditingServanthood;
+                            });
+                          },
+                        ),
+                      ),
+                      Divider(),
+                      _PrayerChipWidget(people: prayerList),
+                    ],
+                  ))
+                ])),
       );
 }
 
@@ -61,74 +98,99 @@ Widget _profilePic(String pic) => Stack(
       ],
     );
 
-class EditableContainer extends StatefulWidget {
-  EditableContainer({Key key}) : super(key: key);
+class _PrayerChipWidget extends StatefulWidget {
+  List<String> people;
+
+  _PrayerChipWidget({Key key, @required this.people}) : super(key: key);
 
   @override
-  _EditableContainerState createState() => _EditableContainerState();
+  _PrayerChipWidgetState createState() => new _PrayerChipWidgetState();
 }
 
-class _EditableContainerState extends State<EditableContainer> {
-  String contents;
-  String servanthood;
-  List<String> prayerList = [];
-  bool isEditingServanthood;
-  bool isEditingPrayer;
+class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
+  TextEditingController _textEditingController = new TextEditingController();
+  bool isEditing = false;
 
   @override
-  void initState() {
-    super.initState();
-    // todo init with user data
-    servanthood = "default servanthood commitment";
-    prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
+  void dispose() {
+    _textEditingController?.dispose();
+    super.dispose();
+  }
+
+  Widget buildChips() {
+    List<Widget> chips = new List();
+
+    if (isEditing) {
+      for (int i = 0; i < widget.people.length; i++) {
+        InputChip actionChip = InputChip(
+          label: Text(widget.people[i]),
+          elevation: 10,
+          pressElevation: 5,
+          shadowColor: Colors.lightBlue,
+          onDeleted: () {
+            widget.people.removeAt(i);
+
+            setState(() {
+              widget.people = widget.people;
+            });
+          },
+        );
+        chips.add(actionChip);
+      }
+    } else {
+      // no delete
+      for (int i = 0; i < widget.people.length; i++) {
+        InputChip actionChip = InputChip(
+            label: Text(widget.people[i]),
+            elevation: 10,
+            pressElevation: 5,
+            shadowColor: Colors.lightBlue);
+        chips.add(actionChip);
+      }
+    }
+
+    return Wrap(spacing: 6.0, children: chips);
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-      width: MediaQuery.of(context).size.width * .9,
-      child: Card(
-          child: Column(
-        children: [
-          ListTile(
-            title: Text('Memory Verse'),
-          ),
-          ListTile(
-            title: Text('Servanthood'),
-            subtitle: Text("TODO make this an editable text widget"),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                setState(() {
-                  isEditingServanthood = !isEditingServanthood;
-                });
-              },
-            ),
-          ),
-          ListTile(
-            title: Text('Prayer'),
-            subtitle: _prayerWidget(prayerList),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                setState(() {
-                  isEditingPrayer = !isEditingPrayer;
-                });
-              },
-            ),
-          ),
-        ],
-      )));
-}
+  Widget build(BuildContext context) {
+    Widget inner;
 
-Widget _prayerWidget(List<String> people) => Row(children: [
-      Text("TODO list of ppl"),
-      // ListView.builder(
-      //   // Let the ListView know how many items it needs to build.
-      //   itemCount: people.length,
-      //   // Provide a builder function. This is where the magic happens.
-      //   // Convert each item into a widget based on the type of item it is.
-      //   itemBuilder: (context, index) {
-      //     return Text(people[index]);
-      //   },
-      // )
-    ]);
+    if (!isEditing) {
+      inner = SizedBox();
+    } else {
+      inner = TextFormField(
+        controller: _textEditingController,
+        onFieldSubmitted: (text) {
+          if (widget.people.length < 5) {
+            widget.people.add(text);
+          }
+          _textEditingController.clear();
+
+          setState(() {
+            widget.people = widget.people;
+          });
+        },
+      );
+    }
+
+    return ListTile(
+      title: Text('Prayer'),
+      subtitle: Container(
+        width: 200,
+        height: 200,
+        child: Column(
+          children: <Widget>[buildChips(), inner],
+        ),
+      ),
+      trailing: IconButton(
+        icon: Icon(Icons.edit),
+        onPressed: () {
+          setState(() {
+            isEditing = !isEditing;
+          });
+        },
+      ),
+    );
+  }
+}
