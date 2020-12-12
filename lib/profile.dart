@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 /// Screen for viewing user profile and all their commitments.
 ///
 /// Owners: Ashley Alvarez, Christy Koh, Chloe Chan
+///
+
 class ProfileWidget extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -11,19 +13,39 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
+  String name;
+  String servantHood;
+  String picturePath;
+  bool isBrother;
+  List<String> prayerList;
+
+  @override
+  void initState() {
+    super.initState();
+    // todo init with user data
+    name = "Godwin Law";
+    isBrother = true;
+    if (isBrother) {
+      picturePath = "images/default_man.jpeg";
+    } else {
+      picturePath = "images/default_woman.jpeg";
+    }
+    servantHood = "";
+    prayerList = [];
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Profile')),
-        // body: Container(color: Colors.deepOrange));
         body: Column(children: [
-          _profilePic(),
+          _profilePic(picturePath),
           Text(
-            'Godwin Law',
+            name,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          _interactiveContainer(),
+          EditableContainer(),
           Row(
             children: [_prayerWidget()],
           ),
@@ -31,32 +53,57 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       );
 }
 
-Widget _profilePic() => Stack(
+Widget _profilePic(String pic) => Stack(
       alignment: const Alignment(0.6, 0.6),
       children: [
         CircleAvatar(
-          backgroundImage: AssetImage('images/default.png'),
+          backgroundImage: AssetImage(pic),
           backgroundColor: Colors.white,
           radius: 100,
         )
       ],
     );
 
-Widget _interactiveContainer() => Container(
-      decoration: BoxDecoration(
-        color: const Color(0xff7c94b6),
-        image: const DecorationImage(
-          image: NetworkImage(
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
-          fit: BoxFit.cover,
-        ),
-        border: Border.all(
-          color: Colors.black,
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child:
-    );
+class EditableContainer extends StatefulWidget {
+  EditableContainer({Key key}) : super(key: key);
 
-StatefulWidget _prayerWidget() => Card();
+  @override
+  _EditableContainerState createState() => _EditableContainerState();
+}
+
+class _EditableContainerState extends State<EditableContainer> {
+  String contents;
+  String servanthood;
+  bool isEditing;
+
+  @override
+  void initState() {
+    super.initState();
+    // todo init with user data
+    servanthood = "default servanthood commitment";
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+      width: MediaQuery.of(context).size.width * .9,
+      child: Card(
+          child: Column(
+        children: [
+          ListTile(
+            title: Text('Memory Verse'),
+          ),
+          ListTile(
+            title: Text('Servanthood'),
+            subtitle: Text("default"),
+            trailing: Icon(Icons.edit),
+          ),
+          ListTile(
+            title: Text('Prayer'),
+            subtitle: _prayerWidget(),
+            trailing: Icon(Icons.edit),
+          ),
+        ],
+      )));
+}
+
+Widget _prayerWidget() => Card();
