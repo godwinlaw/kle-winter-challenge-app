@@ -45,10 +45,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          EditableContainer(),
-          Row(
-            children: [_prayerWidget()],
-          ),
+          EditableContainer()
         ]),
       );
 }
@@ -74,13 +71,16 @@ class EditableContainer extends StatefulWidget {
 class _EditableContainerState extends State<EditableContainer> {
   String contents;
   String servanthood;
-  bool isEditing;
+  List<String> prayerList = [];
+  bool isEditingServanthood;
+  bool isEditingPrayer;
 
   @override
   void initState() {
     super.initState();
     // todo init with user data
     servanthood = "default servanthood commitment";
+    prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
   }
 
   @override
@@ -94,16 +94,41 @@ class _EditableContainerState extends State<EditableContainer> {
           ),
           ListTile(
             title: Text('Servanthood'),
-            subtitle: Text("default"),
-            trailing: Icon(Icons.edit),
+            subtitle: Text("TODO make this an editable text widget"),
+            trailing: IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                setState(() {
+                  isEditingServanthood = !isEditingServanthood;
+                });
+              },
+            ),
           ),
           ListTile(
             title: Text('Prayer'),
-            subtitle: _prayerWidget(),
-            trailing: Icon(Icons.edit),
+            subtitle: _prayerWidget(prayerList),
+            trailing: IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                setState(() {
+                  isEditingPrayer = !isEditingPrayer;
+                });
+              },
+            ),
           ),
         ],
       )));
 }
 
-Widget _prayerWidget() => Card();
+Widget _prayerWidget(List<String> people) => Row(children: [
+      Text("TODO list of ppl"),
+      // ListView.builder(
+      //   // Let the ListView know how many items it needs to build.
+      //   itemCount: people.length,
+      //   // Provide a builder function. This is where the magic happens.
+      //   // Convert each item into a widget based on the type of item it is.
+      //   itemBuilder: (context, index) {
+      //     return Text(people[index]);
+      //   },
+      // )
+    ]);
