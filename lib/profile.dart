@@ -66,19 +66,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                             onPressed: () {},
                           )),
                       Divider(),
-                      ListTile(
-                        title: Text('Servanthood'),
-                        subtitle:
-                            Text("TODO make this an editable text widget"),
-                        trailing: IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            setState(() {
-                              isEditingServanthood = !isEditingServanthood;
-                            });
-                          },
-                        ),
-                      ),
+                      TextfieldWidget(),
                       Divider(),
                       _PrayerChipWidget(people: prayerList),
                     ],
@@ -97,6 +85,73 @@ Widget _profilePic(String pic) => Stack(
         )
       ],
     );
+
+class TextfieldWidget extends StatefulWidget {
+  final TextEditingController _editingController = TextEditingController();
+  String initialText = 'Write your commitment here!';
+
+  @override
+  State<StatefulWidget> createState() {
+    return _TextfieldWidgetState();
+  }
+}
+
+class _TextfieldWidgetState extends State<TextfieldWidget> {
+  bool _isEditingText = false;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+        title: Text('Servanthood'),
+        subtitle: _editTitleTextField(),
+        trailing: IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            setState(() {
+              _isEditingText = !_isEditingText;
+            });
+          },
+        ),
+      );
+
+  Widget _editTitleTextField() {
+    if (_isEditingText)
+      return Column(children: [
+        TextField(
+          onSubmitted: (newValue) {
+            setState(() {
+              widget.initialText = newValue;
+              _isEditingText = false;
+            });
+          },
+          autofocus: true,
+          controller: widget._editingController,
+        ),
+        new RaisedButton(
+          child: new Text("Done Editing"),
+          onPressed: () {
+            setState(() {
+              widget.initialText = widget._editingController.text;
+              _isEditingText = false;
+            });
+          },
+        ),
+      ]);
+    return InkWell(
+        child: Text(
+      widget.initialText,
+      style: TextStyle(
+        color: Colors.black,
+        fontSize: 18.0,
+      ),
+    ));
+  }
+
+  @override
+  void dispose() {
+    widget._editingController.dispose();
+    super.dispose();
+  }
+}
 
 class _PrayerChipWidget extends StatefulWidget {
   List<String> people;
