@@ -177,8 +177,6 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
     return ListTile(
       title: Text('Prayer'),
       subtitle: Container(
-        width: 200,
-        height: 200,
         child: Column(
           children: <Widget>[buildChips(), inner],
         ),
