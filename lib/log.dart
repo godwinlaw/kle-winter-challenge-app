@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'toggle_button.dart';
 
 /// Screen for user to log completed commitments.
 ///
@@ -73,6 +74,7 @@ class _LogWidgetState extends State<LogWidget> {
               ),
             ),
           ),
+          ToggleButton(),
           SizedBox(height: 100),
           Align(
             alignment: Alignment.centerLeft,
@@ -94,6 +96,7 @@ class _LogWidgetState extends State<LogWidget> {
               ),
             ),
           ),
+          ToggleButton(),
           SizedBox(height: 100),
           Align(
             alignment: Alignment.centerLeft,
