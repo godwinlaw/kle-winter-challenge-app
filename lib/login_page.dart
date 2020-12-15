@@ -19,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              //FlutterLogo(size: 150),
               Image(
                   image: AssetImage("assets/klesis_white.png"), height: 172.0),
               SizedBox(height: 50),

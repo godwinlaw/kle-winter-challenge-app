@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "868330955266",
+    "project_id": "winterchallengeapp",
+    "storage_bucket": "winterchallengeapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868330955266:android:3ddac68f3a36924e5c7d1b",
+        "android_client_info": {
+          "package_name": "com.klesis.winterchallenge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868330955266-47at2792c33bmbqaajk9aa9a538hldb4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.klesis.winterchallenge",
+            "certificate_hash": "820482c4f471d1e873d2a5bf7d566ac569e290fa"
+          }
+        },
+        {
+          "client_id": "868330955266-gs05pdcqqctc1v0dj489js2qojs4ua6n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.klesis.winterchallenge",
+            "certificate_hash": "5c3214cfc3713e14eda5264c31fd3d2a5181822c"
+          }
+        },
+        {
+          "client_id": "868330955266-gghes86b0bl3m4vn6u318sflh029mgr5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiQepAp8sxEtuFciM9JNhNQByHmr3zx9M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868330955266-gghes86b0bl3m4vn6u318sflh029mgr5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "868330955266-7tgtdh52jsnvliqprv7rrd7ec78o5oc9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.klesis.winterchallenge"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
