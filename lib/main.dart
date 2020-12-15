@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
+import 'login_page.dart';
 
 void main() {
   runApp(WinterChallengeApp());
@@ -11,7 +12,7 @@ class WinterChallengeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Klesis Winter Challenge',
-      home: Home(),
+      home: LoginPage(),
     );
   }
 }
