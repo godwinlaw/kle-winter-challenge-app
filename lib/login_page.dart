@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:winterchallenge/auth.dart';
 import 'package:winterchallenge/home.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,13 +13,15 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white,
+        color: HexColor("#EAC567"),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              FlutterLogo(size: 150),
+              //FlutterLogo(size: 150),
+              Image(
+                  image: AssetImage("assets/klesis_white.png"), height: 172.0),
               SizedBox(height: 50),
               _signInButton(),
             ],
@@ -40,6 +43,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         });
       },
+      color: Colors.pink,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
       highlightElevation: 0,
       borderSide: BorderSide(color: Colors.grey),
