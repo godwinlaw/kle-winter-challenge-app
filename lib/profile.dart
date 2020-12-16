@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'auth.dart' as auth;
 
 /// Screen for viewing user profile and all their commitments.
 ///
@@ -14,7 +15,7 @@ class ProfileWidget extends StatefulWidget {
 class _ProfileWidgetState extends State<ProfileWidget> {
   String name;
   bool isBrother;
-  String picturePath;
+  ImageProvider profileImage;
 
   String servanthood;
   bool isEditingServanthood;
@@ -26,12 +27,14 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   void initState() {
     super.initState();
     // todo init with user data
-    name = "Godwin Law";
+    name = auth.name;
     isBrother = true;
-    if (isBrother) {
-      picturePath = "images/default_man.jpeg";
+
+    if (auth.photoUrl != null) {
+      profileImage = NetworkImage(auth.photoUrl);
     } else {
-      picturePath = "images/default_woman.jpeg";
+      profileImage = AssetImage(
+          isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
     }
 
     servanthood = "Code the winter challenge app";
@@ -49,7 +52,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _profilePic(picturePath),
+                  _profilePic(profileImage),
                   Text(
                     name,
                     textAlign: TextAlign.center,
@@ -75,11 +78,11 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       );
 }
 
-Widget _profilePic(String pic) => Stack(
+Widget _profilePic(ImageProvider image) => Stack(
       alignment: const Alignment(0.6, 0.6),
       children: [
         CircleAvatar(
-          backgroundImage: AssetImage(pic),
+          backgroundImage: image,
           backgroundColor: Colors.white,
           radius: 100,
         )

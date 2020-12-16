@@ -34,15 +34,15 @@ class _LoginPageState extends State<LoginPage> {
     return OutlineButton(
       splashColor: Colors.grey,
       onPressed: () {
-        signInWithGoogle().then((result) {
-          if (result != null) {
+        signInWithGoogle().then((user) {
+          if (user != null) {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
               return Home();
             }));
           }
         });
       },
-      color: Colors.pink,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
       highlightElevation: 0,
       borderSide: BorderSide(color: Colors.grey),
