@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-
 // Import the firebase_core plugin
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class UserData {
   final String id;
@@ -11,153 +10,228 @@ class UserData {
   final String year;
   final String gender;
 
+  UserData(this.id, this.firstName, this.lastName, this.year, this.gender);
 
-  User(this.id, this.firstName, this.lastName, this.year, this.gender);
-
-  String id() {
-    return this.id
+  String getId() {
+    return this.id;
   }
 
-  String first_name() {
+  String getFirstName() {
     return this.firstName;
   }
 
-  String last_name() {
+  String getLastName() {
     return this.lastName;
   }
 
-  String year() {
+  String getYear() {
     return this.year;
   }
 
-  String gender() {
+  String getGender() {
     return this.gender;
   }
 
   Map<String, dynamic> getDataMap() {
-    return {"id": id(), "firstName": first(), "lastName": last(), 
-    "year": year(), "gender": gender()};
+    return {
+      "id": getId(),
+      "firstName": getFirstName(),
+      "lastName": getLastName(),
+      "year": getYear(),
+      "gender": getGender()
+    };
   }
-
 }
 
-
 class Database {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  final CollectionReference users = firestore.collection('users');
-  final CollectionReference commitments = firestore.collection('commitment');
-  final CollectionReference prayers = firestore.collection('prayer');
-  final CollectionReference results = firestore.collection('result');
-  final CollectionReference verses = firestore.collection('verse');
-  final CollectionReference points = firestore.collection('points');
-
+  final CollectionReference USERS_COLLECTION = firestore.collection('users');
+  final CollectionReference COMMITMENTS_COLLECTION =
+      firestore.collection('commitment');
+  final CollectionReference PRAYERS_COLLECTION = firestore.collection('prayer');
+  final CollectionReference RESULTS_COLLECTION = firestore.collection('result');
+  final CollectionReference VERSES_COLLECTION = firestore.collection('verse');
+  final CollectionReference POINTS_COLLECTION =
+      firestore.collection('POINTS_COLLECTION');
 
   /// CREATE FUNCTIONS
 
-  /// Initializes a user in the database (user_data, empty prayer list, 0 points, record for the week they were initialized)
-  void createUser(User user, String commitment, int week) {
-    users.doc(user.id()).set(user.getDataMap());
-    prayers.doc(user.id()).set({"prayer_list": []);
-    points.doc(user.id()).set({"points": 0});
+  /// Initializes a user in the database (user_data, empty prayer list, 0 POINTS_COLLECTION, record for the week they were initialized)
+  void createUser(UserData user, String commitment, int week) {
+    USERS_COLLECTION.doc(user.getId()).set(user.getDataMap());
+    PRAYERS_COLLECTION.doc(user.getId()).set({"prayer_list": []});
+    POINTS_COLLECTION.doc(user.getId()).set({"points": 0});
     createRecord(user, week);
   }
 
   /// Initialize user record of given week (default none completed)
-  void createRecord(User user, int week) {
-    results.doc(user.id() + week.toString()).set(
-        {"user_id": user.id(), "week": week, "verse": False, "commitment": False, "prayer": False});
+  void createRecord(UserData user, int week) {
+    RESULTS_COLLECTION.doc(user.getId() + week.toString()).set({
+      "user_id": user.getId(),
+      "week": week,
+      "verse": "False",
+      "commitment": "False",
+      "prayer": "False"
+    });
   }
 
   /// Initializes or updates the commitment of a user in the database
-  void setCommitment(User user, String commitment) {
-    commitments.doc(user.id()).set({"commitment":commitment});
+  void setCommitment(UserData user, String commitment) {
+    COMMITMENTS_COLLECTION.doc(user.getId()).set({"commitment": commitment});
   }
 
   /// Sets the verse for the given week
   void setVerse(int week, String verse) {
-    verses.doc(week).set({"verse": verse});
+    VERSES_COLLECTION.doc(week.toString()).set({"verse": verse});
   }
-
 
   /// UPDATE FUNCTIONS
 
   /// Records the user has completed their verse on given week
-  void verseComplete(User user, int week) {
-    results.doc(user.id() + week.toString()).update({"verse": True});
+  void verseComplete(UserData user, int week) {
+    RESULTS_COLLECTION
+        .doc(user.getId() + week.toString())
+        .update({"verse": "True"});
   }
 
   /// Records the user has completed their commitment on given week
-  void commitmentComplete(User user, int week) {
-    results.doc(user.id() + week.toString()).update({"commitment": True});
+  void commitmentComplete(UserData user, int week) {
+    RESULTS_COLLECTION
+        .doc(user.getId() + week.toString())
+        .update({"commitment": "True"});
   }
 
   /// Records the user has completed their prayer on given week
-  void prayerComplete(User user, int week) {
-    results.doc(user.id() + week.toString()).update({"prayer": True});
+  void prayerComplete(UserData user, int week) {
+    RESULTS_COLLECTION
+        .doc(user.getId() + week.toString())
+        .update({"prayer": "True"});
   }
 
   /// Adds name on the prayer_list of the given user in the database
-  void addPrayer(User user, String pray_for) {
-    var prayer_list = getPrayerList(user);
+  void addPrayer(UserData user, String pray_for) async {
+    var prayer_list;
+
+    await getPrayerList(user).then((result) {
+      prayer_list = result;
+    });
+
     prayer_list = prayer_list.add(pray_for);
-    prayers.doc(user.id()).update({"prayer_list": prayer_list});
+
+    PRAYERS_COLLECTION.doc(user.getId()).update({"prayer_list": prayer_list});
   }
 
   /// Add points of a given user by points parameter. Returns the user's new total number of points.
-  int addPoints(User user, int points) {
-    int user_points += getPoints(user) + points;
-    points.doc(user.id()).update({"points": user_points});
+  Future<int> addPoints(UserData user, int points) async {
+    int user_points;
+
+    await getPoints(user).then((result) {
+      user_points = result;
+    });
+
+    POINTS_COLLECTION.doc(user.getId()).update({"points": user_points});
     return user_points;
   }
 
   /// Updates commitment of user in database
-  void updateCommitment(User user, String commitment) {
-    commitments.doc(user.id()).update({"commitment":commitment});
+  void updateCommitment(UserData user, String commitment) {
+    COMMITMENTS_COLLECTION.doc(user.getId()).update({"commitment": commitment});
   }
-  
-
 
   /// GET FUNCTIONS
-  
 
   /// Returns commitment of user as a string
-  String getCommitment(User user) {
-    var commitment = commitments.doc(user.id()).get().data.data();
+  Future<String> getCommitment(UserData user) async {
+    var commitment;
+
+    await COMMITMENTS_COLLECTION.doc(user.getId()).get().then((document) {
+      if (document.exists) {
+        document.get(commitment);
+      }
+    });
+
     return commitment;
   }
 
   /// Returns Prayer List of user
-  var getPrayerList(User user) {
-    var prayer_list = prayers.doc(user.id()).get().data.data()["prayer_list"];
-    return prayer_list;
+  Future<List<String>> getPrayerList(UserData user) async {
+    List<String> prayer_list = List();
 
-  /// Returns current number of points of user
-  int getPoints(User user) {
-    int user_points = points.doc(user.id()).get().data.data()["points"];
+    await PRAYERS_COLLECTION.doc(user.getId()).get().then((document) {
+      if (document.exists) {
+        prayer_list = document.get("prayer_list");
+      }
+    });
+
+    return prayer_list;
+  }
+
+  /// Returns current number of POINTS_COLLECTION of user
+  Future<int> getPoints(UserData user) async {
+    int user_points;
+    await POINTS_COLLECTION.doc(user.getId()).get().then((document) {
+      if (document.exists) {
+        user_points = document.get("points");
+      }
+    });
+
     return user_points;
+  }
 
   /// Returns boolean indicating completion of prayer commitment for given week
-  bool getPrayerResult(User user, int week) {
-    bool prayer = results.doc(user.id() + week.toString()).get().data.data()["prayer"];
+  Future<bool> getPrayerResult(UserData user, int week) async {
+    bool prayer;
+    await RESULTS_COLLECTION
+        .doc(user.getId() + week.toString())
+        .get()
+        .then((document) {
+      if (document.exists) {
+        prayer = document.get("prayer");
+      }
+    });
+
     return prayer;
   }
 
   /// Returns boolean indicating completion of prayer commitment for given week
-  bool getCommitmentResult(User user, int week) {
-    bool commitment = results.doc(user.id() + week.toString()).get().data.data()["commitment"];
+  Future<bool> getCommitmentResult(UserData user, int week) async {
+    bool commitment;
+
+    await RESULTS_COLLECTION
+        .doc(user.getId() + week.toString())
+        .get()
+        .then((document) {
+      if (document.exists) {
+        commitment = document.get("commitment");
+      }
+    });
+
     return commitment;
   }
 
   /// Returns boolean indicating completion of prayer commitment for given week
-  bool getVerseResult(User user, int week) {
-    bool verse = results.doc(user.id() + week.toString()).get().data.data()["verse"];
+  Future<bool> getVerseResult(UserData user, int week) async {
+    bool verse;
+
+    await RESULTS_COLLECTION
+        .doc(user.getId() + week.toString())
+        .get()
+        .then((document) {
+      if (document.exists) {
+        verse = document.get("verse");
+      }
+    });
+
     return verse;
   }
 
-  String getVerse(int week) {
-    var verse = verses.doc(week).get().data.data()["verse"];
+  Future<String> getVerse(int week) async {
+    var verse;
+    await VERSES_COLLECTION.doc(week.toString()).get().then((document) {
+      if (document.exists) {
+        verse = document.get("verse");
+      }
+    });
+
     return verse;
   }
-
 }
