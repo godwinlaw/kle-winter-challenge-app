@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'home.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(WinterChallengeApp());
 }
 
@@ -21,20 +22,41 @@ class WinterChallengeApp extends StatelessWidget {
       builder: (context, snapshot) {
         // Check for errors
         if (snapshot.hasError) {
-          return Home();
-        }
-
-        // Once complete, show your application
-        if (snapshot.connectionState == ConnectionState.done) {
+          print(snapshot.error);
           return MaterialApp(
             title: 'Klesis Winter Challenge',
             home: Home(),
           );
         }
 
+        // Once complete, show your application
+        if (snapshot.connectionState == ConnectionState.done) {
+          return MaterialApp(
+            title: 'Klesis Winter Challenge',
+            home: LoginPage(),
+          );
+        }
+
         // Otherwise, show something whilst waiting for initialization to complete
-        return Home();
+        return MaterialApp(
+          title: 'Klesis Winter Challenge',
+          home: LoadingCircle(),
+        );
       },
+    );
+  }
+}
+
+class LoadingCircle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.white,
+        ),
+        alignment: Alignment(0.0, 0.0),
+      ),
     );
   }
 }
