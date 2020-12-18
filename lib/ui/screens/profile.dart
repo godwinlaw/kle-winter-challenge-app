@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:winterchallenge/database.dart';
+import 'package:winterchallenge/core/data/database.dart';
 
 /// Screen for viewing user profile and all their commitments.
 ///

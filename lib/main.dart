@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+import 'ui/screens/login_page.dart';
 // Import the firebase_core plugin
 import 'package:firebase_core/firebase_core.dart';
-import 'home.dart';
+import 'ui/screens/home.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:winterchallenge/auth.dart';
-import 'package:winterchallenge/home.dart';
+import 'package:winterchallenge/core/services/auth.dart';
+import 'package:winterchallenge/ui/screens/home.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:winterchallenge/database.dart';
+import 'package:winterchallenge/core/data/database.dart';
 
 final firebaseRepository = new FirebaseRepository();
 

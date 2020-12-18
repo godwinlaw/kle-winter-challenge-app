@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'scoreboard.dart';
 import 'log.dart';
 import 'profile.dart';
-import 'auth.dart';
+import '../../core/services/auth.dart';
 
 class Home extends StatefulWidget {
   @override
