@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'auth.dart' as auth;
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:winterchallenge/database.dart';
 
 /// Screen for viewing user profile and all their commitments.
 ///
@@ -13,8 +14,12 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
+  final user = auth.FirebaseAuth.instance.currentUser;
+  final firebaseRepository = new FirebaseRepository();
+
   String name;
   bool isBrother;
+  String photoUrl;
   ImageProvider profileImage;
 
   String servanthood;
@@ -27,11 +32,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   void initState() {
     super.initState();
     // todo init with user data
-    name = auth.name;
+    name = "Godwin Law";
     isBrother = true;
+    photoUrl = null;
 
-    if (auth.photoUrl != null) {
-      profileImage = NetworkImage(auth.photoUrl);
+    if (photoUrl != null) {
+      profileImage = NetworkImage(photoUrl);
     } else {
       profileImage = AssetImage(
           isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");

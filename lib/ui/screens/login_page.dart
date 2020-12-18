@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:winterchallenge/auth.dart';
 import 'package:winterchallenge/home.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:winterchallenge/database.dart';
+
+final firebaseRepository = new FirebaseRepository();
 
 class LoginPage extends StatefulWidget {
   @override
@@ -22,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
               Image(
                   image: AssetImage("assets/klesis_white.png"), height: 172.0),
               SizedBox(height: 50),
-              _signInButton(),
+              _signInGoogleButton(),
             ],
           ),
         ),
@@ -30,12 +34,17 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _signInButton() {
+  Widget _signInGoogleButton() {
     return OutlineButton(
       splashColor: Colors.grey,
-      onPressed: () {
-        signInWithGoogle().then((user) {
-          if (user != null) {
+      onPressed: () async {
+        await signInWithGoogle().then((auth.User firebaseUser) async {
+          if (firebaseUser != null) {
+            // If it is a new user, create a user in the database
+            if (firebaseRepository.getUserDetails(firebaseUser.uid) != null) {
+              print('Creating new user in Database');
+              firebaseRepository.createUserWithGoogleProvider(firebaseUser);
+            }
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
               return Home();
             }));
