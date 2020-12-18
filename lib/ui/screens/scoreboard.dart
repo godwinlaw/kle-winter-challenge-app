@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:winterchallenge/core/data/database.dart';
 
 /// Screen for viewing the scoreboard.
 ///
@@ -11,6 +12,8 @@ class ScoreboardWidget extends StatefulWidget {
 }
 
 class _ScoreboardWidgetState extends State<ScoreboardWidget> {
+  final firebaseRepository = new FirebaseRepository();
+
   @override
   Widget build(BuildContext context) {
     return scoreboardTab();

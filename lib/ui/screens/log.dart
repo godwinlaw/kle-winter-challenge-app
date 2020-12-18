@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:winterchallenge/core/data/database.dart';
 import '../elements/toggle_button.dart';
 
 /// Screen for user to log completed commitments.
@@ -12,6 +13,8 @@ class LogWidget extends StatefulWidget {
 }
 
 class _LogWidgetState extends State<LogWidget> {
+  final firebaseRepository = new FirebaseRepository();
+
   @override
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
