@@ -35,8 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _signInGoogleButton() {
-    return OutlineButton(
-      splashColor: Colors.grey,
+    return RaisedButton(
       onPressed: () async {
         await signInWithGoogle().then((auth.User firebaseUser) async {
           if (firebaseUser != null) {
@@ -54,7 +53,6 @@ class _LoginPageState extends State<LoginPage> {
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
       highlightElevation: 0,
-      borderSide: BorderSide(color: Colors.grey),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Row(
