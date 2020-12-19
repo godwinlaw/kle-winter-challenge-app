@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:winterchallenge/core/data/database.dart';
+import 'package:winterchallenge/ui/screens/login_page.dart';
+import '../../core/services/auth.dart'; /// Used for log out 
 
 /// Screen for viewing user profile and all their commitments.
 ///
@@ -31,10 +33,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   @override
   void initState() {
     super.initState();
-    // todo init with user data
-    name = "Godwin Law";
+    // TODO: init with user data
+    name = user.displayName;
     isBrother = true;
-    photoUrl = null;
+    photoUrl = user.photoURL;
 
     if (photoUrl != null) {
       profileImage = NetworkImage(photoUrl);
@@ -79,9 +81,43 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       Divider(),
                       _PrayerChipWidget(people: prayerList),
                     ],
-                  ))
+                  )),
+                  _logOutWidget(context)
                 ])),
       );
+}
+
+/// A button that logs the user out when pressed, then returns to login page
+Widget _logOutWidget(BuildContext context) {
+  return RaisedButton(
+    onPressed: () async {
+      // Sign out
+      await signOutGoogle();
+      // Return to login page
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginPage()));
+    },
+    color: Colors.white,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+    child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Log Out',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+  );
 }
 
 Widget _profilePic(ImageProvider image) => Stack(
