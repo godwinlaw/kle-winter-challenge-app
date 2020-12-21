@@ -178,22 +178,59 @@ class FirebaseRepository {
     return score;
   }
 
-  // Returns the scores sorted by year and ordered from highest to lowest.
-  Future<int> getRankedScoreForYear(YearInSchool year) {
-    // TODO: Implement method
-    return null;
+  // Returns the scores sorted by year.
+  Future<Map<YearInSchool, int>> getScoresByYear() async {
+    Map<YearInSchool, int> scoresByYear = {};
+    await firestore
+        .collection(USERS_COLLECTION)
+        .get()
+        .then((data) => {
+          data.docs.forEach((element) {
+            if (scoresByYear[element[YEAR_FIELD]] == null) {
+              scoresByYear[element[YEAR_FIELD]] = 0;
+            }
+            scoresByYear[element[YEAR_FIELD]] += element[SCORE_FIELD];
+          })
+        });
+    print(scoresByYear);
+    return scoresByYear;
   }
 
-  // Returns the scores sorted by gender and ordered from highest to lowest.
-  Future<int> getRankedScoreForGender(Gender year) {
-    // TODO: Implement method
-    return null;
+  // Returns the scores sorted by gender.
+  Future<Map<Gender, int>> getScoresByGender() async {
+    int femaleCounter;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .where(GENDER_FIELD, isEqualTo: Gender.Female)
+        .get()
+        .then((data) => {
+          data.docs.forEach((doc) => femaleCounter += (doc[SCORE_FIELD]))
+        });
+    
+    int maleCounter;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .where(GENDER_FIELD, isEqualTo: Gender.Male)
+        .get()
+        .then((data) => {
+          data.docs.forEach((doc) => maleCounter += (doc[SCORE_FIELD]))
+        });
+    print(femaleCounter);
+    return { Gender.Male: maleCounter, Gender.Female: femaleCounter };
   }
 
   // Returns individual scores and ordered from highest to lowest.
-  Future<int> getRankedScoreForIndividuals() {
-    // TODO: Implement method
-    return null;
+  Future<List<Map<String, String>>> getRankedScoreForIndividuals() async {  
+    List<Map<String, String>> userScores = [];
+    await firestore
+      .collection(USERS_COLLECTION)
+      .orderBy(SCORE_FIELD)
+      .get()
+      .then((value) => value.docs.forEach((element) {
+        userScores.add({ FULL_NAME_FIELD: element[FULL_NAME_FIELD], SCORE_FIELD: element[SCORE_FIELD] });
+      }));
+      print(userScores);
+    return userScores;
   }
 
   // Returns boolean indicating completion of commitment for given week
