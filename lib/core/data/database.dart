@@ -229,7 +229,7 @@ class FirebaseRepository {
         .then((value) => value.docs.forEach((element) {
               userScores.add({
                 FULL_NAME_FIELD: element[FULL_NAME_FIELD],
-                SCORE_FIELD: element[SCORE_FIELD]
+                SCORE_FIELD: element[SCORE_FIELD].toString()
               });
             }));
     print(userScores);

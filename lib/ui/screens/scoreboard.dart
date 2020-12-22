@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:winterchallenge/core/data/database.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 /// Screen for viewing the scoreboard.
 ///
@@ -13,6 +14,7 @@ class ScoreboardWidget extends StatefulWidget {
 
 class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   final firebaseRepository = new FirebaseRepository();
+  final user = auth.FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +68,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
                 ]),
           ),
           body: TabBarView(children: [
-            classList(),
+            year(),
             gender(),
             individualYearTab(),
           ]),
@@ -120,10 +122,10 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           ),
           body: TabBarView(
             children: [
-              individualList(YearInSchool.Senior),
-              individualList(YearInSchool.Junior),
-              individualList(YearInSchool.Sophomore),
-              individualList(YearInSchool.Freshmen),
+              individual(YearInSchool.Senior),
+              individual(YearInSchool.Junior),
+              individual(YearInSchool.Sophomore),
+              individual(YearInSchool.Freshmen),
             ],
             physics: NeverScrollableScrollPhysics(),
           ),
@@ -140,17 +142,29 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   // the second element of the list corresponds to a list of the points in order of the points
   // the third element of the list is the number of years (should be 4 for most cases)
   // the first and second elements of the list should match up
-  List<List> getClassRankedData() {
-    // firebaseRepository.getScoresByYear();
-    List<String> years = ["Seniors", "Juniors", "Sophomores", "Freshmen"];
-    List<int> points = [300, 200, 160, 30];
-    List<int> number = [years.length];
-    return [years, points, number];
+
+  Future<List<List>> getYearData() async {
+    List<int> points = [];
+    Map<YearInSchool, int> scoresByYear;
+    await firebaseRepository
+        .getScoresByYear()
+        .then((value) => scoresByYear = value);
+    points.add(scoresByYear[YearInSchool.Senior]);
+    points.add(scoresByYear[YearInSchool.Junior]);
+    points.add(scoresByYear[YearInSchool.Sophomore]);
+    points.add(scoresByYear[YearInSchool.Freshmen]);
+    List<YearInSchool> years = [
+      YearInSchool.Senior,
+      YearInSchool.Junior,
+      YearInSchool.Sophomore,
+      YearInSchool.Freshmen
+    ];
+    return [years, points];
   }
 
   // takes in the class year and points
   // returns a tile on the class tab with the year and points
-  Container classTile(String classYear, int points) {
+  Container classTile(YearInSchool classYear, int points) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 35.0),
       child: Card(
@@ -161,7 +175,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           contentPadding:
               EdgeInsets.symmetric(vertical: 25.0, horizontal: 30.0),
           title: Text(
-            classYear,
+            classYear.toString(),
             textScaleFactor: 1.5,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -174,21 +188,25 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     );
   }
 
-  ListView classList() {
-    // change to FutureBuilder
-    List<List> data = getClassRankedData();
-    List<String> years = data.elementAt(0);
-    List<int> points = data.elementAt(1);
-    List<int> number = data.elementAt(2);
-    int num = number.elementAt(0);
-    return ListView(children: <Widget>[
-      // making space between tab bar and the first card (space up top)
-      Container(
-        padding: EdgeInsets.symmetric(vertical: 15.0),
-      ),
-      for (var i = 0; i < num; i++)
-        classTile(years.elementAt(i), points.elementAt(i))
-    ]);
+  FutureBuilder year() {
+    return FutureBuilder<List<List>>(
+        future: getYearData(),
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<List> data = snapshot.data;
+            List<YearInSchool> years = data.elementAt(0);
+            List<int> points = data.elementAt(1);
+            int num = 4;
+            return ListView(children: <Widget>[
+              // making space between tab bar and the first card (space up top)
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 15.0),
+              ),
+              for (var i = 0; i < num; i++) classTile(years[i], points[i]),
+            ]);
+          }
+        });
   }
 
 // Functionality for gender tab
@@ -282,7 +300,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   //    (change the leading part of the Flutter Logo; take in one more argument)
   // given name, points, and rank of an individual,
   // returns a container that creates a tile for the person on the Individual tab under their year
-  Container individualTile(String name, int points, int rank) {
+  Container individualTile(String name, String points, int rank) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 15.0),
       child: new Card(
@@ -310,36 +328,38 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     );
   }
 
-  // TODO: add in functionality for photos of people (put that as the 4th data point)
-  // DATA:
-  // given the class year, gets all the people in that year
-  // returns a list of a list
-  // the first element of the list corresponds to a list of the people in order of their points
-  // the second element of the list corresponds to a list of the points in order of the points
-  // the third element of the list is the number of people in the year
-  // the first and second elements of the list should match up
-  List<List> getIndividualRankedData(YearInSchool classYear) {
-    //firebaseRepository.getRankedScoreForIndividuals(classYear);
-    List<String> names = ["Sarah", "John", "Chloe"];
-    List<int> points = [150, 60, 30];
-    List<int> number = [names.length];
-    return [names, points, number];
+  Future<List<List>> getIndividualData(YearInSchool year) async {
+    List<String> points = [];
+    List<String> names = [];
+    List<Map<String, String>> individualScores;
+    await firebaseRepository
+        .getRankedScoreForIndividuals(year)
+        .then((value) => individualScores = value);
+    for (int i = 0; i < individualScores.length; i++) {
+      names.add(individualScores[i][0]);
+      points.add(individualScores[i][1]);
+    }
+    return [names, points];
   }
 
-  // TODO: add in functionality for photos of people (get from individual data; pass it into individual)
-  ListView individualList(YearInSchool classYear) {
-    //change to FutureBuilder
-    List<List> data = getIndividualRankedData(classYear);
-    List<String> names = data.elementAt(0);
-    List<int> points = data.elementAt(1);
-    List<int> number = data.elementAt(2);
-    int numInYear = number.elementAt(0);
+  FutureBuilder individual(YearInSchool year) {
+    return FutureBuilder<List<List>>(
+        future: getIndividualData(year),
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<List> data = snapshot.data;
+            List<String> names = data.elementAt(0);
+            List<String> points = data.elementAt(1);
 
-    return ListView(
-        // replace i with the number of individuals in the class
-        children: <Widget>[
-          for (var i = 0; i < numInYear; i++)
-            individualTile(names.elementAt(i), points.elementAt(i), i + 1)
-        ]);
+            return ListView(
+                // replace i with the number of individuals in the class
+                children: <Widget>[
+                  for (var i = 0; i < names.length; i++)
+                    individualTile(
+                        names.elementAt(i), points.elementAt(i), i + 1)
+                ]);
+          }
+        });
   }
 }
