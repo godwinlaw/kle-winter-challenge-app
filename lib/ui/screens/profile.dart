@@ -27,30 +27,39 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   ImageProvider profileImage;
 
   String servanthood;
-  bool isEditingServanthood;
-
   List<String> prayerList;
-  bool isEditingPrayer;
 
   @override
   void initState() {
     super.initState();
-    // TODO: init with user data
-    final userInfo = firebaseRepository.getUserDetails(user.uid);
-
+    // TODO: test init with user data
+    Map<String, dynamic> userInfo;
     name = user.displayName;
-    isBrother = Gender.Male == Gender.Male;
-    photoUrl = user.photoURL;
 
-    if (photoUrl != "") {
+
+    firebaseRepository.getUserDetails(user.uid).then((user) {
+      userInfo = user;
+    });
+
+    // TODO: if getting user Map works, apply to all fields
+    // instead of making separate firebaseRepository calls
+    isBrother = userInfo["gender"] == Gender.Male;
+
+    photoUrl = user.photoURL;
+    if (photoUrl != null) {
       profileImage = NetworkImage(photoUrl);
     } else {
       profileImage = AssetImage(
           isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
     }
 
-    servanthood = "Code the winter challenge app";
-    prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
+    firebaseRepository
+        .getServanthoodCommitment(user.uid)
+        .then((value) => servanthood = value);
+
+    firebaseRepository
+        .getPrayerList(user.uid)
+        .then((value) => prayerList = value);
   }
 
   @override
