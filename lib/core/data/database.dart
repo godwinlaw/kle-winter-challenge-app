@@ -1,4 +1,6 @@
 // Import the firebase_core plugin
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:tuple/tuple.dart';
@@ -119,8 +121,8 @@ class FirebaseRepository {
 
   /// GET FUNCTIONS
   // Returns the user details
-  Future<Object> getUserDetails(String userId) async {
-    var user;
+  Future<Map<String, dynamic>> getUserDetails(String userId) async {
+    Map<String, dynamic> user;
 
     await firestore
         .collection(USERS_COLLECTION)
@@ -128,7 +130,7 @@ class FirebaseRepository {
         .get()
         .then((document) {
       if (document.exists) {
-        user = document;
+        user = document.data();
       }
     });
 
