@@ -120,10 +120,10 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           ),
           body: TabBarView(
             children: [
-              individualList("Seniors"),
-              individualList("Juniors"),
-              individualList("Sophomores"),
-              individualList("Freshmen"),
+              individualList(YearInSchool.Senior),
+              individualList(YearInSchool.Junior),
+              individualList(YearInSchool.Sophomore),
+              individualList(YearInSchool.Freshmen),
             ],
             physics: NeverScrollableScrollPhysics(),
           ),
@@ -141,6 +141,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   // the third element of the list is the number of years (should be 4 for most cases)
   // the first and second elements of the list should match up
   List<List> getClassRankedData() {
+    // firebaseRepository.getScoresByYear();
     List<String> years = ["Seniors", "Juniors", "Sophomores", "Freshmen"];
     List<int> points = [300, 200, 160, 30];
     List<int> number = [years.length];
@@ -174,6 +175,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   }
 
   ListView classList() {
+    // change to FutureBuilder
     List<List> data = getClassRankedData();
     List<String> years = data.elementAt(0);
     List<int> points = data.elementAt(1);
@@ -196,9 +198,15 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   // the first element of the list corresponds to a list of the gender
   // the second element of the list corresponds to a list of the pointsnts
   // the first and second elements of the list should match up
-  List<List> getGenderData() {
+  Future<List<List>> getGenderData() async {
+    List<int> points = [];
+    Map<Gender, int> scoresByGender;
+    await firebaseRepository
+        .getScoresByGender()
+        .then((value) => scoresByGender = value);
+    points.add(scoresByGender[Gender.Female]);
+    points.add(scoresByGender[Gender.Male]);
     List<String> years = ["SISTERS", "BROTHERS"];
-    List<int> points = [240, 30];
     return [years, points];
   }
 
@@ -243,21 +251,29 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     );
   }
 
-  Container gender() {
-    List<List> data = getGenderData();
-    List<String> gender = data.elementAt(0);
-    List<int> points = data.elementAt(1);
-    return Container(
-      //padding: EdgeInsets.symmetric(vertical: 120.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          genderTile(gender.elementAt(0), points.elementAt(0)),
-          genderTile(gender.elementAt(1), points.elementAt(1))
-        ],
-      ),
-    );
+  FutureBuilder gender() {
+    return FutureBuilder<List<List>>(
+        future: getGenderData(),
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<List> data = snapshot.data;
+            List<String> gender = data.elementAt(0);
+            List<int> points = data.elementAt(1);
+
+            return Container(
+              //padding: EdgeInsets.symmetric(vertical: 120.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  genderTile(gender.elementAt(0), points.elementAt(0)),
+                  genderTile(gender.elementAt(1), points.elementAt(1))
+                ],
+              ),
+            );
+          }
+        });
   }
 
 // Functionality for individual tab
@@ -302,7 +318,8 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   // the second element of the list corresponds to a list of the points in order of the points
   // the third element of the list is the number of people in the year
   // the first and second elements of the list should match up
-  List<List> getIndividualRankedData(String classYear) {
+  List<List> getIndividualRankedData(YearInSchool classYear) {
+    //firebaseRepository.getRankedScoreForIndividuals(classYear);
     List<String> names = ["Sarah", "John", "Chloe"];
     List<int> points = [150, 60, 30];
     List<int> number = [names.length];
@@ -310,7 +327,8 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   }
 
   // TODO: add in functionality for photos of people (get from individual data; pass it into individual)
-  ListView individualList(String classYear) {
+  ListView individualList(YearInSchool classYear) {
+    //change to FutureBuilder
     List<List> data = getIndividualRankedData(classYear);
     List<String> names = data.elementAt(0);
     List<int> points = data.elementAt(1);
