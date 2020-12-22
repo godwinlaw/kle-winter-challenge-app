@@ -41,7 +41,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       userInfo = user;
     });
 
-    // TODO: if getting user Map works, apply to all fields
+    // TODO: if accessing key from user Map works, apply to all fields
     // instead of making separate firebaseRepository calls
     isBrother = userInfo["gender"] == Gender.Male;
 
