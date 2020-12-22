@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:winterchallenge/core/data/database.dart';
 import 'package:winterchallenge/ui/screens/login_page.dart';
-import '../../core/services/auth.dart'; /// Used for log out 
+import '../../core/services/auth.dart';
+
+/// Used for log out
 
 /// Screen for viewing user profile and all their commitments.
 ///
@@ -34,8 +36,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   void initState() {
     super.initState();
     // TODO: init with user data
+    final userInfo = firebaseRepository.getUserDetails(user.uid);
+
     name = user.displayName;
-    isBrother = true;
+    isBrother = Gender.Male == Gender.Male;
     photoUrl = user.photoURL;
 
     if (photoUrl != null) {
@@ -47,13 +51,18 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
     servanthood = "Code the winter challenge app";
     prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
-    isEditingServanthood = false;
-    isEditingPrayer = false;
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Profile')),
+        appBar: AppBar(
+            title: const Text(
+              'Profile',
+              style: TextStyle(color: Colors.black),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            brightness: Brightness.light),
         body: Container(
             margin: const EdgeInsets.only(left: 20.0, right: 20.0),
             child: Column(
@@ -67,21 +76,22 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
                   ),
-                  Card(
-                      child: Column(
-                    children: [
-                      ListTile(
-                          title: Text('Memory Verse'),
-                          trailing: IconButton(
-                            icon: Icon(Icons.arrow_forward_ios_rounded),
-                            onPressed: () {},
-                          )),
-                      Divider(),
-                      TextfieldWidget(),
-                      Divider(),
-                      _PrayerChipWidget(people: prayerList),
-                    ],
-                  )),
+                  individualTile(
+                    ListTile(
+                        title: Text('Memory Verses',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black)),
+                        trailing: IconButton(
+                          icon: Icon(Icons.arrow_forward_ios_rounded),
+                          onPressed: () {
+                            // TODO: display memory verses in another page
+                          },
+                        )),
+                  ),
+                  individualTile(TextfieldWidget()),
+                  individualTile(_PrayerChipWidget(people: prayerList)),
                   _logOutWidget(context)
                 ])),
       );
@@ -94,29 +104,42 @@ Widget _logOutWidget(BuildContext context) {
       // Sign out
       await signOutGoogle();
       // Return to login page
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginPage()));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => LoginPage()));
     },
     color: Colors.white,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
     child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                'Log Out',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black,
-                ),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              'Log Out',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.black,
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
+    ),
+  );
+}
+
+// adapted from scoreboard, wrapper for ListTiles
+Container individualTile(Widget tileChild) {
+  return Container(
+    padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 15.0),
+    child: new Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+      child: tileChild,
+    ),
   );
 }
 
@@ -146,7 +169,11 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        title: Text('Servanthood'),
+        title: Text('Servanthood',
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.black)),
         subtitle: _editTitleTextField(),
         trailing: IconButton(
           icon: Icon(Icons.edit),
@@ -186,7 +213,7 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
       widget.initialText,
       style: TextStyle(
         color: Colors.black,
-        fontSize: 18.0,
+        fontSize: 14.0,
       ),
     ));
   }
@@ -275,7 +302,9 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
     }
 
     return ListTile(
-      title: Text('Prayer'),
+      title: Text('Prayer',
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.w500, color: Colors.black)),
       subtitle: Container(
         child: Column(
           children: <Widget>[buildChips(), inner],
@@ -289,6 +318,7 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
           });
         },
       ),
+      contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
     );
   }
 }
