@@ -121,7 +121,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Matt',
+                  'Toby Chen',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -135,7 +135,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Sam',
+                  'Michael Jiang',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -149,7 +149,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Michael',
+                  'Merryle Wang',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:winterchallenge/core/data/database.dart';
 import 'package:winterchallenge/ui/screens/login_page.dart';
-import '../../core/services/auth.dart'; /// Used for log out 
+import '../../core/services/auth.dart';
+
+/// Used for log out
 
 /// Screen for viewing user profile and all their commitments.
 ///
@@ -46,7 +48,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     }
 
     servanthood = "Code the winter challenge app";
-    prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
+    prayerList = ["Toby", "Michael", "Merryle", "Emilio", "Chibuzor"];
     isEditingServanthood = false;
     isEditingPrayer = false;
   }
@@ -94,29 +96,30 @@ Widget _logOutWidget(BuildContext context) {
       // Sign out
       await signOutGoogle();
       // Return to login page
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginPage()));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => LoginPage()));
     },
     color: Colors.white,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
     child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                'Log Out',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black,
-                ),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              'Log Out',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.black,
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
+    ),
   );
 }
 
