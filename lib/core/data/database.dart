@@ -181,10 +181,7 @@ class FirebaseRepository {
   // Returns the scores sorted by year.
   Future<Map<YearInSchool, int>> getScoresByYear() async {
     Map<YearInSchool, int> scoresByYear = {};
-    await firestore
-        .collection(USERS_COLLECTION)
-        .get()
-        .then((data) => {
+    await firestore.collection(USERS_COLLECTION).get().then((data) => {
           data.docs.forEach((element) {
             if (scoresByYear[element[YEAR_FIELD]] == null) {
               scoresByYear[element[YEAR_FIELD]] = 0;
@@ -198,38 +195,44 @@ class FirebaseRepository {
 
   // Returns the scores sorted by gender.
   Future<Map<Gender, int>> getScoresByGender() async {
-    int femaleCounter;
+    int femaleCounter = 0;
     await firestore
         .collection(USERS_COLLECTION)
-        .where(GENDER_FIELD, isEqualTo: Gender.Female)
+        .where(GENDER_FIELD, isEqualTo: Gender.Female.toString())
         .get()
         .then((data) => {
-          data.docs.forEach((doc) => femaleCounter += (doc[SCORE_FIELD]))
-        });
-    
-    int maleCounter;
+              data.docs.forEach(
+                  (doc) => femaleCounter += (int.parse(doc[SCORE_FIELD])))
+            });
+
+    int maleCounter = 0;
     await firestore
         .collection(USERS_COLLECTION)
-        .where(GENDER_FIELD, isEqualTo: Gender.Male)
+        .where('gender', isEqualTo: Gender.Male.toString())
         .get()
         .then((data) => {
-          data.docs.forEach((doc) => maleCounter += (doc[SCORE_FIELD]))
-        });
+              data.docs.forEach(
+                  (doc) => maleCounter += (int.parse(doc[SCORE_FIELD])))
+            });
     print(femaleCounter);
-    return { Gender.Male: maleCounter, Gender.Female: femaleCounter };
+    return {Gender.Male: maleCounter, Gender.Female: femaleCounter};
   }
 
   // Returns individual scores and ordered from highest to lowest.
-  Future<List<Map<String, String>>> getRankedScoreForIndividuals() async {  
+  Future<List<Map<String, String>>> getRankedScoreForIndividuals(
+      YearInSchool classYear) async {
     List<Map<String, String>> userScores = [];
     await firestore
-      .collection(USERS_COLLECTION)
-      .orderBy(SCORE_FIELD)
-      .get()
-      .then((value) => value.docs.forEach((element) {
-        userScores.add({ FULL_NAME_FIELD: element[FULL_NAME_FIELD], SCORE_FIELD: element[SCORE_FIELD] });
-      }));
-      print(userScores);
+        .collection(USERS_COLLECTION)
+        .where(YEAR_FIELD, isEqualTo: classYear.toString())
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              userScores.add({
+                FULL_NAME_FIELD: element[FULL_NAME_FIELD],
+                SCORE_FIELD: element[SCORE_FIELD]
+              });
+            }));
+    print(userScores);
     return userScores;
   }
 
