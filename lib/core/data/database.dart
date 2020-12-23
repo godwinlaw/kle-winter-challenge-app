@@ -189,7 +189,6 @@ class FirebaseRepository {
             scoresByYear[element[YEAR_FIELD]] += element[SCORE_FIELD];
           })
         });
-    print(scoresByYear);
     return scoresByYear;
   }
 
@@ -211,10 +210,11 @@ class FirebaseRepository {
         .where('gender', isEqualTo: Gender.Male.toString())
         .get()
         .then((data) => {
-              data.docs.forEach(
-                  (doc) => maleCounter += (int.parse(doc[SCORE_FIELD])))
+              data.docs.forEach((doc) => maleCounter += (int.parse(
+                  doc.data().containsKey(SCORE_FIELD)
+                      ? doc[SCORE_FIELD]
+                      : '0')))
             });
-    print(femaleCounter);
     return {Gender.Male: maleCounter, Gender.Female: femaleCounter};
   }
 
@@ -227,12 +227,18 @@ class FirebaseRepository {
         .where(YEAR_FIELD, isEqualTo: classYear.toString())
         .get()
         .then((value) => value.docs.forEach((element) {
+              Map<String, dynamic> data = element.data();
               userScores.add({
-                FULL_NAME_FIELD: element[FULL_NAME_FIELD],
-                SCORE_FIELD: element[SCORE_FIELD]
+                FULL_NAME_FIELD: data.containsKey(FULL_NAME_FIELD)
+                    ? data[FULL_NAME_FIELD]
+                    : '',
+                SCORE_FIELD:
+                    data.containsKey(SCORE_FIELD) ? data[SCORE_FIELD] : '0',
+                PROFILE_URL_FIELD: data.containsKey(PROFILE_URL_FIELD)
+                    ? data[PROFILE_URL_FIELD]
+                    : '',
               });
             }));
-    print(userScores);
     return userScores;
   }
 
