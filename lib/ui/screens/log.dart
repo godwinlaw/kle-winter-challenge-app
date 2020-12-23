@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../elements/toggle_button.dart';
+import "./../../core/data/database.dart";
+import "package:firebase_auth/firebase_auth.dart" as auth;
 
 /// Screen for user to log completed commitments.
 ///
@@ -12,6 +14,7 @@ class LogWidget extends StatefulWidget {
 }
 
 class _LogWidgetState extends State<LogWidget> {
+  final user = auth.FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
