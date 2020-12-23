@@ -178,22 +178,107 @@ class FirebaseRepository {
     return score;
   }
 
-  // Returns the scores sorted by year and ordered from highest to lowest.
-  Future<int> getRankedScoreForYear(YearInSchool year) {
-    // TODO: Implement method
-    return null;
+  /// Returns the profile picture of the user
+  Future<String> getUserProfile(String userId) async {
+    String profile;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        profile = document.get(PROFILE_URL_FIELD);
+      }
+    });
+
+    return profile;
   }
 
-  // Returns the scores sorted by gender and ordered from highest to lowest.
-  Future<int> getRankedScoreForGender(Gender year) {
-    // TODO: Implement method
-    return null;
+// Returns the scores sorted by year.
+  Future<Map<YearInSchool, int>> getScoresByYear() async {
+    Map<YearInSchool, int> scoresByYear = {};
+    await firestore.collection(USERS_COLLECTION).get().then((data) => {
+          data.docs.forEach((element) {
+            Map<String, dynamic> data = element.data();
+            if (data.containsKey(YEAR_FIELD) && data.containsKey(SCORE_FIELD)) {
+              String yearStr = data[YEAR_FIELD];
+              YearInSchool year = convertYearIntoEnum(yearStr);
+              if (scoresByYear[year] == null) {
+                scoresByYear[year] = 0;
+              }
+              scoresByYear[year] += int.parse(data[SCORE_FIELD]);
+            }
+          })
+        });
+    return scoresByYear;
+  }
+
+  YearInSchool convertYearIntoEnum(String year) {
+    switch (year) {
+      case "YearInSchool.Freshmen":
+        return YearInSchool.Freshmen;
+      case "YearInSchool.Sophomore":
+        return YearInSchool.Sophomore;
+      case "YearInSchool.Junior":
+        return YearInSchool.Junior;
+      case "YearInSchool.Senior":
+        return YearInSchool.Senior;
+      default:
+        return YearInSchool.Staff;
+    }
+  }
+
+  // Returns the scores sorted by gender.
+  Future<Map<Gender, int>> getScoresByGender() async {
+    int femaleCounter = 0;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .where(GENDER_FIELD, isEqualTo: Gender.Female.toString())
+        .get()
+        .then((data) => {
+              data.docs.forEach(
+                  (doc) => femaleCounter += (int.parse(doc[SCORE_FIELD])))
+            });
+
+    int maleCounter = 0;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .where('gender', isEqualTo: Gender.Male.toString())
+        .get()
+        .then((data) => {
+              data.docs.forEach((doc) => maleCounter += (int.parse(
+                  doc.data().containsKey(SCORE_FIELD)
+                      ? doc[SCORE_FIELD]
+                      : '0')))
+            });
+    return {Gender.Male: maleCounter, Gender.Female: femaleCounter};
   }
 
   // Returns individual scores and ordered from highest to lowest.
-  Future<int> getRankedScoreForIndividuals() {
-    // TODO: Implement method
-    return null;
+  Future<List<Map<String, String>>> getRankedScoreForIndividuals(
+      YearInSchool classYear) async {
+    List<Map<String, String>> userScores = [];
+    await firestore
+        .collection(USERS_COLLECTION)
+        .where(YEAR_FIELD, isEqualTo: classYear.toString())
+        //.orderBy(SCORE_FIELD, descending: true)
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              Map<String, dynamic> data = element.data();
+              userScores.add({
+                FULL_NAME_FIELD: data.containsKey(FULL_NAME_FIELD)
+                    ? data[FULL_NAME_FIELD]
+                    : '',
+                SCORE_FIELD:
+                    data.containsKey(SCORE_FIELD) ? data[SCORE_FIELD] : '0',
+                PROFILE_URL_FIELD: data.containsKey(PROFILE_URL_FIELD)
+                    ? data[PROFILE_URL_FIELD]
+                    : '',
+                GENDER_FIELD:
+                    data.containsKey(GENDER_FIELD) ? data[GENDER_FIELD] : '',
+              });
+            }));
+    return userScores;
   }
 
   // Returns boolean indicating completion of commitment for given week

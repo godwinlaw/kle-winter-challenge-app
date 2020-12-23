@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:winterchallenge/core/data/database.dart';
 import '../elements/toggle_button.dart';
 import "./../../core/data/database.dart";
 import "package:firebase_auth/firebase_auth.dart" as auth;
@@ -16,6 +17,7 @@ class LogWidget extends StatefulWidget {
 }
 
 class _LogWidgetState extends State<LogWidget> {
+
   final user = auth.FirebaseAuth.instance.currentUser;
 
   List<bool> isSelectedVerse;
@@ -32,6 +34,7 @@ class _LogWidgetState extends State<LogWidget> {
 
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -216,7 +219,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Matt',
+                  'Toby Chen',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -230,7 +233,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Sam',
+                  'Michael Jiang',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -244,7 +247,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Michael',
+                  'Merryle Wang',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
