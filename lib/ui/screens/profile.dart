@@ -48,7 +48,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     }
 
     servanthood = "Code the winter challenge app";
-    prayerList = ["Christy Koh", "Ashley Alvarez", "Chloe Chan"];
+    prayerList = ["Toby", "Michael", "Merryle", "Emilio", "Chibuzor"];
     isEditingServanthood = false;
     isEditingPrayer = false;
   }

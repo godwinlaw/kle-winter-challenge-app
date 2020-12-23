@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:winterchallenge/core/data/database.dart';
 import '../elements/toggle_button.dart';
 
 /// Screen for user to log completed commitments.
@@ -12,6 +13,8 @@ class LogWidget extends StatefulWidget {
 }
 
 class _LogWidgetState extends State<LogWidget> {
+  final firebaseRepository = new FirebaseRepository();
+
   @override
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
@@ -118,7 +121,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Matt',
+                  'Toby Chen',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -132,7 +135,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Sam',
+                  'Michael Jiang',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -146,7 +149,7 @@ class _LogWidgetState extends State<LogWidget> {
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 padding: const EdgeInsets.all(3.0),
                 child: Text(
-                  'Michael',
+                  'Merryle Wang',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,

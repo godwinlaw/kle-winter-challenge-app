@@ -246,8 +246,10 @@ class FirebaseRepository {
         .where('gender', isEqualTo: Gender.Male.toString())
         .get()
         .then((data) => {
-              data.docs.forEach(
-                  (doc) => maleCounter += (int.parse(doc[SCORE_FIELD])))
+              data.docs.forEach((doc) => maleCounter += (int.parse(
+                  doc.data().containsKey(SCORE_FIELD)
+                      ? doc[SCORE_FIELD]
+                      : '0')))
             });
     return {Gender.Male: maleCounter, Gender.Female: femaleCounter};
   }

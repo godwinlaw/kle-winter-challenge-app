@@ -303,7 +303,6 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     return FutureBuilder<List<List>>(
         future: getGenderData(),
         builder: (context, snapshot) {
-          print(snapshot);
           if (snapshot.connectionState == ConnectionState.done) {
             List<List> data = snapshot.data;
             List<String> gender = data.elementAt(0);
