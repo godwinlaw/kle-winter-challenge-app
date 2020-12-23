@@ -3,12 +3,7 @@ import "package:firebase_auth/firebase_auth.dart" as auth;
 
 class ToggleButton extends StatefulWidget {
   final user = auth.FirebaseAuth.instance.currentUser;
-  Future<bool> isCompleted;
-  void markComplete;
-  ToggleButton(Future<bool> _isCompleted, void _markComplete) {
-    this.isCompleted = _isCompleted;
-    this.markComplete = _markComplete;
-  }
+
   @override
   _ToggleButtonState createState() => _ToggleButtonState();
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import '../elements/toggle_button.dart';
 import "./../../core/data/database.dart";
@@ -15,6 +17,22 @@ class LogWidget extends StatefulWidget {
 
 class _LogWidgetState extends State<LogWidget> {
   final user = auth.FirebaseAuth.instance.currentUser;
+
+  List<bool> isSelectedVerse;
+  List<bool> isSelectedServanthood;
+  bool verse;
+  bool servanthood;
+  void initState() {
+    FirebaseRepository()
+        .isVerseMemorizedForCurrentWeek(user.uid)
+        .then((value) => isSelectedVerse = [value, !value]);
+    FirebaseRepository()
+        .isServanthoodCompletedForCurrentWeek(user.uid)
+        .then((value) => isSelectedServanthood = [value, !value]);
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
@@ -77,7 +95,45 @@ class _LogWidgetState extends State<LogWidget> {
               ),
             ),
           ),
-          ToggleButton(),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: ToggleButtons(
+              borderColor: Colors.black,
+              fillColor: Colors.white,
+              borderWidth: 1,
+              selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+              selectedColor: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+              children: <Widget>[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
+                  child: Text(
+                    'Not Yet',
+                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
+                  child: Text(
+                    'I did it!',
+                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
+                  ),
+                ),
+              ],
+              onPressed: (int index) {
+                FirebaseRepository().markVerseMemorized(user.uid);
+                setState(() {
+                  for (int i = 0; i < isSelectedVerse.length; i++) {
+                    isSelectedVerse[i] = i == index;
+                  }
+                });
+              },
+              isSelected: isSelectedVerse,
+            ),
+          ), // toggle button
           SizedBox(height: 100),
           Align(
             alignment: Alignment.centerLeft,
@@ -99,7 +155,46 @@ class _LogWidgetState extends State<LogWidget> {
               ),
             ),
           ),
-          ToggleButton(),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: ToggleButtons(
+              borderColor: Colors.black,
+              fillColor: Colors.white,
+              borderWidth: 1,
+              selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+              selectedColor: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+              children: <Widget>[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
+                  child: Text(
+                    'Not Yet',
+                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
+                  child: Text(
+                    'I did it!',
+                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
+                  ),
+                ),
+              ],
+              onPressed: (int index) {
+                FirebaseRepository()
+                    .markServanthoodCommitmentCompleted(user.uid);
+                setState(() {
+                  for (int i = 0; i < isSelectedServanthood.length; i++) {
+                    isSelectedServanthood[i] = i == index;
+                  }
+                });
+              },
+              isSelected: isSelectedServanthood,
+            ),
+          ),
           SizedBox(height: 100),
           Align(
             alignment: Alignment.centerLeft,
