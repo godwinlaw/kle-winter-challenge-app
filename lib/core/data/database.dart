@@ -178,18 +178,54 @@ class FirebaseRepository {
     return score;
   }
 
-  // Returns the scores sorted by year.
+  /// Returns the profile picture of the user
+  Future<String> getUserProfile(String userId) async {
+    String profile;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        profile = document.get(PROFILE_URL_FIELD);
+      }
+    });
+
+    return profile;
+  }
+
+// Returns the scores sorted by year.
   Future<Map<YearInSchool, int>> getScoresByYear() async {
     Map<YearInSchool, int> scoresByYear = {};
     await firestore.collection(USERS_COLLECTION).get().then((data) => {
           data.docs.forEach((element) {
-            if (scoresByYear[element[YEAR_FIELD]] == null) {
-              scoresByYear[element[YEAR_FIELD]] = 0;
+            Map<String, dynamic> data = element.data();
+            if (data.containsKey(YEAR_FIELD) && data.containsKey(SCORE_FIELD)) {
+              String yearStr = data[YEAR_FIELD];
+              YearInSchool year = convertYearIntoEnum(yearStr);
+              if (scoresByYear[year] == null) {
+                scoresByYear[year] = 0;
+              }
+              scoresByYear[year] += int.parse(data[SCORE_FIELD]);
             }
-            scoresByYear[element[YEAR_FIELD]] += element[SCORE_FIELD];
           })
         });
     return scoresByYear;
+  }
+
+  YearInSchool convertYearIntoEnum(String year) {
+    switch (year) {
+      case "YearInSchool.Freshmen":
+        return YearInSchool.Freshmen;
+      case "YearInSchool.Sophomore":
+        return YearInSchool.Sophomore;
+      case "YearInSchool.Junior":
+        return YearInSchool.Junior;
+      case "YearInSchool.Senior":
+        return YearInSchool.Senior;
+      default:
+        return YearInSchool.Staff;
+    }
   }
 
   // Returns the scores sorted by gender.
@@ -225,6 +261,7 @@ class FirebaseRepository {
     await firestore
         .collection(USERS_COLLECTION)
         .where(YEAR_FIELD, isEqualTo: classYear.toString())
+        //.orderBy(SCORE_FIELD, descending: true)
         .get()
         .then((value) => value.docs.forEach((element) {
               Map<String, dynamic> data = element.data();
@@ -237,6 +274,8 @@ class FirebaseRepository {
                 PROFILE_URL_FIELD: data.containsKey(PROFILE_URL_FIELD)
                     ? data[PROFILE_URL_FIELD]
                     : '',
+                GENDER_FIELD:
+                    data.containsKey(GENDER_FIELD) ? data[GENDER_FIELD] : '',
               });
             }));
     return userScores;

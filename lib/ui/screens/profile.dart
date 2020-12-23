@@ -40,7 +40,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     isBrother = true;
     photoUrl = user.photoURL;
 
-    if (photoUrl != null) {
+    if (photoUrl != "") {
       profileImage = NetworkImage(photoUrl);
     } else {
       profileImage = AssetImage(
