@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:winterchallenge/ui/screens/login_page.dart';
+import 'package:winterchallenge/core/data/database.dart';
 import '../../core/services/auth.dart';
 
 final user = auth.FirebaseAuth.instance.currentUser;
@@ -21,34 +22,7 @@ class ProfileWidget extends StatefulWidget {
 class _ProfileWidgetState extends State<ProfileWidget> {
   String name;
   bool isBrother;
-  String photoUrl;
   ImageProvider profileImage;
-
-  @override
-  void initState() {
-    super.initState();
-    // TODO: test init with user data
-    Map<String, dynamic> userInfo;
-    name = user.displayName;
-
-
-    firebaseRepository.getUserDetails(user.uid).then((user) {
-      userInfo = user;
-    });
-
-    // TODO: if accessing key from user Map works, apply to all fields
-    // instead of making separate firebaseRepository calls
-    // isBrother = userInfo["gender"] == Gender.Male;
-    isBrother = false;
-
-    photoUrl = user.photoURL;
-    if (photoUrl != null) {
-      profileImage = NetworkImage(photoUrl);
-    } else {
-      profileImage = AssetImage(
-          isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
-    }
-  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -68,9 +42,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               Container(
                   alignment: Alignment.center,
                   child: Column(children: [
-                    _profilePic(profileImage),
+                    _profilePic(),
                     Text(
-                      name,
+                      user.displayName,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style:
@@ -147,16 +121,52 @@ Container individualTile(Widget tileChild) {
   );
 }
 
-Widget _profilePic(ImageProvider image) => Stack(
-      alignment: const Alignment(0.6, 0.6),
-      children: [
-        CircleAvatar(
-          backgroundImage: image,
-          backgroundColor: Colors.white,
-          radius: 100,
-        )
-      ],
-    );
+Future<ImageProvider> _getProfilePic() async {
+  ImageProvider result;
+  print("getting profile pic");
+  await firebaseRepository.getUserDetails(user.uid).then((value) {
+    bool isBrother = value["gender"] == Gender.Male;
+    print("gender: " + value["gender"]);
+    if (user.photoURL != null) {
+      print("google photo");
+      result = NetworkImage(user.photoURL);
+    } else {
+      print("default photo");
+      result = AssetImage(
+          isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
+    }
+  });
+  return result;
+}
+
+FutureBuilder _profilePic() => FutureBuilder<Gender>(
+    future: firebaseRepository.getGender(user.uid),
+    builder: (context, snapshot) {
+      ImageProvider img;
+      if (user.photoURL != null) {
+        print("google photo");
+        img = NetworkImage(user.photoURL);
+      } else {
+        img = AssetImage("assets/default_man.jpeg");
+      }
+
+      if (snapshot.hasData) {
+        Gender gender = snapshot.data;
+        bool isBrother = gender == Gender.Male;
+        if (user.photoURL == null) {
+          print("default photo");
+          img = AssetImage(isBrother
+              ? "assets/default_man.jpeg"
+              : "assets/default_woman.jpeg");
+        }
+      }
+
+      return CircleAvatar(
+        backgroundImage: img,
+        backgroundColor: Colors.white,
+        radius: 100,
+      );
+    });
 
 class ServanthoodWidget extends StatefulWidget {
   @override
@@ -350,17 +360,9 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
           }
           if (widget.people.length < 5) {
             widget.people.add(text);
-          } else {
-            print("maximum of 5 people reached.");
           }
           firebaseRepository.updatePrayerCommitment(user.uid, widget.people);
           _textEditingController.clear();
-
-          print("added new prayer target");
-          firebaseRepository.getPrayerList(user.uid).then((result) {
-            // widget.people = result;
-            print(result);
-          });
           setState(() {
             widget.people = widget.people;
           });

@@ -144,7 +144,7 @@ class FirebaseRepository {
     firestore
         .collection(USERS_COLLECTION)
         .doc(userId)
-        .update({YEAR_FIELD: gender});
+        .update({GENDER_FIELD: gender});
   }
 
   /// GET FUNCTIONS
@@ -161,8 +161,24 @@ class FirebaseRepository {
         user = document.data();
       }
     });
+    print(user);
 
     return user;
+  }
+
+  // Gets the gender of the user
+  Future<Gender> getGender(String userId) async {
+    Gender gender;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        gender = document.get(GENDER_FIELD);
+      }
+    });
+    return gender;
   }
 
   /// Returns servanthood commitment of user as a string
@@ -178,7 +194,6 @@ class FirebaseRepository {
         commitment = document.get(SERVANTHOOD_FIELD);
       }
     });
-    print(commitment);
 
     return commitment;
   }
