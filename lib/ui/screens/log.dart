@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:winterchallenge/core/data/database.dart';
 import '../elements/toggle_button.dart';
+import "./../../core/data/database.dart";
+import "package:firebase_auth/firebase_auth.dart" as auth;
 
 /// Screen for user to log completed commitments.
 ///
@@ -13,7 +17,58 @@ class LogWidget extends StatefulWidget {
 }
 
 class _LogWidgetState extends State<LogWidget> {
-  final firebaseRepository = new FirebaseRepository();
+  final user = auth.FirebaseAuth.instance.currentUser;
+
+  List<bool> isSelectedVerse;
+  List<bool> isSelectedServanthood;
+  List<bool> isPrayerCompleted;
+  bool verse;
+  bool servanthood;
+  void initState() {
+    FirebaseRepository()
+        .isVerseMemorizedForCurrentWeek(user.uid)
+        .then((value) => isSelectedVerse = [!value, !!value]);
+    FirebaseRepository()
+        .isServanthoodCompletedForCurrentWeek(user.uid)
+        .then((value) => isSelectedServanthood = [!value, !!value]);
+    FirebaseRepository()
+        .isPrayerOfferedForCurrentWeek(user.uid)
+        .then((value) => isPrayerCompleted = [!value, !!value]);
+    super.initState();
+  }
+
+  Future<List<bool>> getVerseMemorized() async {
+    await FirebaseRepository()
+        .isVerseMemorizedForCurrentWeek(user.uid)
+        .then((value) => isSelectedVerse = [!value, !!value]);
+    return isSelectedVerse;
+  }
+
+  Future<List<bool>> getServanthood() async {
+    await FirebaseRepository()
+        .isServanthoodCompletedForCurrentWeek(user.uid)
+        .then((value) => isSelectedServanthood = [!value, !!value]);
+    return isSelectedServanthood;
+  }
+
+  Future<List<bool>> getIsPrayerCompleted() async {
+    await FirebaseRepository()
+        .isPrayerOfferedForCurrentWeek(user.uid)
+        .then((value) => isPrayerCompleted = [!value, !!value]);
+    return isPrayerCompleted;
+  }
+
+  Future<String> getServanthoodCommitment() async {
+    String servanthoodCommitment =
+        await FirebaseRepository().getServanthoodCommitment(user.uid);
+    return servanthoodCommitment;
+  }
+
+  Future<List<String>> getPrayerList() async {
+    List<dynamic> prayerList =
+        await FirebaseRepository().getPrayerList(user.uid);
+    return prayerList.map((e) => e.toString()).toList();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -77,7 +132,54 @@ class _LogWidgetState extends State<LogWidget> {
               ),
             ),
           ),
-          ToggleButton(),
+          Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              child: FutureBuilder<List<bool>>(
+                  future: getVerseMemorized(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return ToggleButtons(
+                          borderColor: Colors.black,
+                          fillColor: Colors.white,
+                          borderWidth: 1,
+                          selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+                          selectedColor: Colors.black,
+                          borderRadius: BorderRadius.circular(12),
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 36.0, vertical: 0),
+                              child: Text(
+                                'Not Yet',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: "Montserrat"),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 36.0, vertical: 0),
+                              child: Text(
+                                'I did it!',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: "Montserrat"),
+                              ),
+                            ),
+                          ],
+                          onPressed: (int index) {
+                            FirebaseRepository()
+                                .markVerseMemorized(user.uid, index == 1);
+                            setState(() {
+                              for (int i = 0; i < isSelectedVerse.length; i++) {
+                                isSelectedVerse[i] = i == index;
+                              }
+                            });
+                          },
+                          isSelected: isSelectedVerse);
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  })), // toggle button
           SizedBox(height: 100),
           Align(
             alignment: Alignment.centerLeft,
@@ -91,16 +193,78 @@ class _LogWidgetState extends State<LogWidget> {
             ),
           ),
           SizedBox(height: 15),
-          Center(
-            child: Text(
-              'Did you clean the toilets 1x a week?',
-              style: TextStyle(
-                color: Colors.black,
-              ),
-            ),
+          FutureBuilder(
+              future: getServanthoodCommitment(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Center(
+                    child: Text(
+                      snapshot.data == null
+                          ? 'Input a servanthood data in Profile'
+                          : snapshot.data,
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                } else {
+                  return Wrap();
+                }
+              }),
+
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: FutureBuilder<List<bool>>(
+                future: getServanthood(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return ToggleButtons(
+                      borderColor: Colors.black,
+                      fillColor: Colors.white,
+                      borderWidth: 1,
+                      selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+                      selectedColor: Colors.black,
+                      borderRadius: BorderRadius.circular(12),
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 36.0, vertical: 0),
+                          child: Text(
+                            'Not Yet',
+                            style: TextStyle(
+                                fontSize: 12, fontFamily: "Montserrat"),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 36.0, vertical: 0),
+                          child: Text(
+                            'I did it!',
+                            style: TextStyle(
+                                fontSize: 12, fontFamily: "Montserrat"),
+                          ),
+                        ),
+                      ],
+                      onPressed: (int index) {
+                        FirebaseRepository().markServanthoodCommitmentCompleted(
+                            user.uid, index == 1);
+                        setState(() {
+                          for (int i = 0;
+                              i < isSelectedServanthood.length;
+                              i++) {
+                            isSelectedServanthood[i] = i == index;
+                          }
+                        });
+                      },
+                      isSelected: isSelectedServanthood,
+                    );
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                }),
           ),
-          ToggleButton(),
-          SizedBox(height: 100),
+          SizedBox(height: 50),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -112,52 +276,83 @@ class _LogWidgetState extends State<LogWidget> {
               ),
             ),
           ),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: FutureBuilder<List<String>>(
+                  future: getPrayerList(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Text(
+                              snapshot.data == null
+                                  ? 'Add your prayers from profile'
+                                  : formatPrayerList(snapshot.data),
+                              style: TextStyle(
+                                color: Color(0xffC4C4C4),
+                                fontSize: 14,
+                              )));
+                    } else {
+                      return Wrap();
+                    }
+                  })),
+
           SizedBox(height: 20),
-          Wrap(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                padding: const EdgeInsets.all(3.0),
-                child: Text(
-                  'Toby Chen',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.lightBlue,
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                padding: const EdgeInsets.all(3.0),
-                child: Text(
-                  'Michael Jiang',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                padding: const EdgeInsets.all(3.0),
-                child: Text(
-                  'Merryle Wang',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                  ),
-                ),
-              )
-            ],
-          ),
+          Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              child: FutureBuilder<List<bool>>(
+                  future: getIsPrayerCompleted(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return ToggleButtons(
+                          borderColor: Colors.black,
+                          fillColor: Colors.white,
+                          borderWidth: 1,
+                          selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+                          selectedColor: Colors.black,
+                          borderRadius: BorderRadius.circular(12),
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 36.0, vertical: 0),
+                              child: Text(
+                                'Not Yet',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: "Montserrat"),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 36.0, vertical: 0),
+                              child: Text(
+                                'I did it!',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: "Montserrat"),
+                              ),
+                            ),
+                          ],
+                          onPressed: (int index) {
+                            FirebaseRepository()
+                                .markPrayerCompleted(user.uid, index == 1);
+                            setState(() {
+                              for (int i = 0;
+                                  i < isPrayerCompleted.length;
+                                  i++) {
+                                isPrayerCompleted[i] = i == index;
+                              }
+                            });
+                          },
+                          isSelected: isPrayerCompleted);
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  })), // to
+          SizedBox(height: 30)
         ]),
       ))));
+
+  String formatPrayerList(List<String> prayerList) {
+    return prayerList.join(", ");
+  }
 }
