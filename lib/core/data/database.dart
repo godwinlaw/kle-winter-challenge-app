@@ -116,8 +116,10 @@ class FirebaseRepository {
       week.toString(): {commitmentType: complete}
     }, new SetOptions(merge: true));
 
-    firestore.collection(USERS_COLLECTION).doc(userId).update(
-        {SCORE_FIELD: FieldValue.increment(getPointValue(commitmentType))});
+    if (complete) {
+      firestore.collection(USERS_COLLECTION).doc(userId).update(
+          {SCORE_FIELD: FieldValue.increment(getPointValue(commitmentType))});
+    }
   }
 
   // Records the user has memorized their verse for the week
@@ -143,7 +145,7 @@ class FirebaseRepository {
     firestore
         .collection(USERS_COLLECTION)
         .doc(userId)
-        .update({YEAR_FIELD: year});
+        .update({YEAR_FIELD: year.toString()});
   }
 
   // Sets the gender of the user
@@ -151,7 +153,7 @@ class FirebaseRepository {
     firestore
         .collection(USERS_COLLECTION)
         .doc(userId)
-        .update({GENDER_FIELD: gender});
+        .update({GENDER_FIELD: gender.toString()});
   }
 
   /// GET FUNCTIONS
@@ -171,19 +173,42 @@ class FirebaseRepository {
     return user;
   }
 
-  // Gets the gender of the user
-  Future<Gender> getGender(String userId) async {
-    Gender gender;
+  Future<YearInSchool> getYear(String userId) async {
+    String year;
     await firestore
         .collection(USERS_COLLECTION)
         .doc(userId)
         .get()
         .then((document) {
       if (document.exists) {
-        gender = document.get(GENDER_FIELD);
+        if (document.data().containsKey(YEAR_FIELD)) {
+          year = document.get(YEAR_FIELD);
+        }
       }
     });
-    return gender;
+
+    return convertYearIntoEnum(year);
+  }
+
+  // Gets the gender of the user
+  Future<Gender> getGender(String userId) async {
+    String gender;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        if (document.data().containsKey(GENDER_FIELD)) {
+          gender = document.get(GENDER_FIELD);
+        }
+      }
+    });
+    if (gender == "Gender.Male") {
+      return Gender.Male;
+    } else {
+      return Gender.Female;
+    }
   }
 
   /// Returns servanthood commitment of user as a string
@@ -293,8 +318,10 @@ class FirebaseRepository {
         .collection(USERS_COLLECTION)
         .where(GENDER_FIELD, isEqualTo: Gender.Female.toString())
         .get()
-        .then((data) =>
-            {data.docs.forEach((doc) => femaleCounter += doc[SCORE_FIELD])});
+        .then((data) => {
+              data.docs.forEach((doc) => femaleCounter +=
+                  doc.data().containsKey(SCORE_FIELD) ? doc[SCORE_FIELD] : 0)
+            });
 
     int maleCounter = 0;
     await firestore

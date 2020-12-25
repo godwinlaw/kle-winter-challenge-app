@@ -27,14 +27,18 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: Text("Scoreboard", style: TextStyle(color: Colors.black)),
+            centerTitle: true,
+            title: Text("Scoreboard",
+                style:
+                    TextStyle(fontFamily: "Montserrat", color: Colors.black)),
             backgroundColor: Colors.white,
             elevation: 0,
             bottom: TabBar(
                 unselectedLabelColor: Colors.black,
                 indicatorColor: Colors.black,
                 labelColor: Colors.white,
-                labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                labelStyle: TextStyle(
+                    fontFamily: "Montserrat", fontWeight: FontWeight.bold),
                 unselectedLabelStyle: TextStyle(),
                 indicatorSize: TabBarIndicatorSize.label,
                 indicator: BoxDecoration(
@@ -87,9 +91,12 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
                 unselectedLabelColor: Colors.grey,
                 indicatorColor: Colors.white,
                 labelColor: Colors.black,
-                labelStyle:
-                    TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                labelStyle: TextStyle(
+                    fontFamily: "Montserrat",
+                    fontSize: 25.0,
+                    fontWeight: FontWeight.bold),
                 unselectedLabelStyle: TextStyle(
+                  fontFamily: "Montserrat",
                   fontSize: 17.0,
                 ),
                 indicatorSize: TabBarIndicatorSize.label,
@@ -206,12 +213,15 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           title: Text(
             classYear.toString(),
             textScaleFactor: 1.5,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontFamily: "Montserrat", fontWeight: FontWeight.bold),
           ),
           trailing: Text(points.toString(),
               textScaleFactor: 1.5,
               style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.grey[600])),
+                  fontFamily: "Montserrat",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600])),
         ),
       ),
     );
@@ -267,7 +277,9 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
             child: Text(gender,
                 textScaleFactor: 5.0,
                 style: TextStyle(
-                    fontWeight: FontWeight.bold, color: Colors.black))));
+                    fontFamily: "Montserrat",
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black))));
   }
 
   Container genderTile(String gender, int points) {
@@ -282,14 +294,18 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           ),
           Text(gender,
               textScaleFactor: 1.0,
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+              style: TextStyle(
+                  fontFamily: "Montserrat",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black)),
           Text(
             " ",
             textScaleFactor: 0.5,
           ),
           Text(points.toString(),
-              textScaleFactor: 1.5, style: TextStyle(color: Colors.grey[700])),
+              textScaleFactor: 1.5,
+              style:
+                  TextStyle(fontFamily: "Montserrat", color: Colors.grey[700])),
           Text(
             " ",
             textScaleFactor: 10,
@@ -345,12 +361,15 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           title: Text(
             name,
             textScaleFactor: 1.3,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontFamily: "Montserrat", fontWeight: FontWeight.bold),
           ),
           trailing: Text(points.toString(),
               textScaleFactor: 1.5,
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+              style: TextStyle(
+                  fontFamily: "Montserrat",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue)),
         ),
       ),
     );
@@ -369,7 +388,6 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
 
   Widget profilePicture(String photoUrl, String gender) {
     ImageProvider profileImage;
-    print(gender);
     bool isBrother;
     if (gender != null && gender == "Gender.Female") {
       isBrother = false;
