@@ -1,4 +1,6 @@
 // Import the firebase_core plugin
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:tuple/tuple.dart';
@@ -57,7 +59,17 @@ class FirebaseRepository {
   }
 
   /// Adds name on the prayer_list of the given user in the database
-  void updatePrayerCommitment(String userId, String name) async {
+  void updatePrayerCommitment(String userId, List<String> prayerList) async {
+    if (prayerList.length <= 5) {
+      firestore
+          .collection(COMMITMENTS_COLLECTION)
+          .doc(userId)
+          .update({PRAYER_FIELD: prayerList});
+    }
+  }
+
+  /// Adds name on the prayer_list of the given user in the database
+  void addPrayerCommitment(String userId, String name) async {
     var prayerList;
 
     await getPrayerList(userId).then((result) {
@@ -66,6 +78,24 @@ class FirebaseRepository {
 
     if (prayerList.length < 5) {
       prayerList = prayerList.add(name);
+
+      firestore
+          .collection(COMMITMENTS_COLLECTION)
+          .doc(userId)
+          .update({PRAYER_FIELD: prayerList});
+    }
+  }
+
+  /// Deletes name on the prayer_list of the given user in the database
+  void deletePrayerCommitment(String userId, int index) async {
+    List<String> prayerList;
+
+    await getPrayerList(userId).then((result) {
+      prayerList = result.toList();
+    });
+
+    if (prayerList.length < 5) {
+      prayerList.removeAt(index);
 
       firestore
           .collection(COMMITMENTS_COLLECTION)
@@ -114,13 +144,13 @@ class FirebaseRepository {
     firestore
         .collection(USERS_COLLECTION)
         .doc(userId)
-        .update({YEAR_FIELD: gender});
+        .update({GENDER_FIELD: gender});
   }
 
   /// GET FUNCTIONS
   // Returns the user details
-  Future<Object> getUserDetails(String userId) async {
-    var user;
+  Future<Map<String, dynamic>> getUserDetails(String userId) async {
+    Map<String, dynamic> user;
 
     await firestore
         .collection(USERS_COLLECTION)
@@ -128,16 +158,32 @@ class FirebaseRepository {
         .get()
         .then((document) {
       if (document.exists) {
-        user = document;
+        user = document.data();
       }
     });
+    print(user);
 
     return user;
   }
 
-  // Get commitment of user of certain type (prayer or servanthood)
-  Future<dynamic> getCommitment(String userId, String commitmentType) async {
-    var commitment;
+  // Gets the gender of the user
+  Future<Gender> getGender(String userId) async {
+    Gender gender;
+    await firestore
+        .collection(USERS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        gender = document.get(GENDER_FIELD);
+      }
+    });
+    return gender;
+  }
+
+  /// Returns servanthood commitment of user as a string
+  Future<String> getServanthoodCommitment(String userId) async {
+    String commitment;
 
     await firestore
         .collection(COMMITMENTS_COLLECTION)
@@ -145,21 +191,28 @@ class FirebaseRepository {
         .get()
         .then((document) {
       if (document.exists) {
-        commitment = document.get(commitmentType);
+        commitment = document.get(SERVANTHOOD_FIELD);
       }
     });
 
     return commitment;
   }
 
-  /// Returns servanthood commitment of user as a string
-  Future<String> getServanthoodCommitment(String userId) async {
-    return getCommitment(userId, SERVANTHOOD_FIELD);
-  }
-
   /// Returns prayer list of user
   Future<List<String>> getPrayerList(String userId) async {
-    return getCommitment(userId, PRAYER_FIELD);
+    List<String> commitment;
+
+    await firestore
+        .collection(COMMITMENTS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        commitment = document.get(PRAYER_FIELD).cast<String>();
+      }
+    });
+
+    return commitment;
   }
 
   /// Returns the current score of the user
