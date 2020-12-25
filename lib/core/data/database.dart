@@ -160,12 +160,12 @@ class FirebaseRepository {
 
   /// Returns servanthood commitment of user as a string
   Future<String> getServanthoodCommitment(String userId) async {
-    return getCommitment(userId, SERVANTHOOD_FIELD);
+    return await getCommitment(userId, SERVANTHOOD_FIELD);
   }
 
   /// Returns prayer list of user
-  Future<List<String>> getPrayerList(String userId) async {
-    return getCommitment(userId, PRAYER_FIELD);
+  Future<List<dynamic>> getPrayerList(String userId) async {
+    return await getCommitment(userId, PRAYER_FIELD);
   }
 
   /// Returns the current score of the user
@@ -288,7 +288,6 @@ class FirebaseRepository {
   Future<bool> isCommitmentCompletedForWeek(
       String userId, String commitment, int weekNumber) async {
     bool isCompleted = false;
-    var tasks;
 
     await firestore
         .collection(PROGRESS_COLLECTION)
@@ -298,8 +297,10 @@ class FirebaseRepository {
       if (document.exists) {
         Map<String, dynamic> data = document.data();
         if (data.containsKey(weekNumber.toString())) {
-          tasks = data[weekNumber.toString()];
-          isCompleted = tasks[commitment];
+          Map<String, dynamic> tasks = data[weekNumber.toString()];
+          if (tasks.containsKey(commitment)) {
+            isCompleted = !!tasks[commitment];
+          }
         }
       }
     });
