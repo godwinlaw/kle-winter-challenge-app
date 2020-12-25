@@ -59,7 +59,17 @@ class FirebaseRepository {
   }
 
   /// Adds name on the prayer_list of the given user in the database
-  void updatePrayerCommitment(String userId, String name) async {
+  void updatePrayerCommitment(String userId, List<String> prayerList) async {
+    if (prayerList.length <= 5) {
+      firestore
+          .collection(COMMITMENTS_COLLECTION)
+          .doc(userId)
+          .update({PRAYER_FIELD: prayerList});
+    }
+  }
+
+  /// Adds name on the prayer_list of the given user in the database
+  void addPrayerCommitment(String userId, String name) async {
     var prayerList;
 
     await getPrayerList(userId).then((result) {
@@ -68,6 +78,24 @@ class FirebaseRepository {
 
     if (prayerList.length < 5) {
       prayerList = prayerList.add(name);
+
+      firestore
+          .collection(COMMITMENTS_COLLECTION)
+          .doc(userId)
+          .update({PRAYER_FIELD: prayerList});
+    }
+  }
+
+  /// Deletes name on the prayer_list of the given user in the database
+  void deletePrayerCommitment(String userId, int index) async {
+    List<String> prayerList;
+
+    await getPrayerList(userId).then((result) {
+      prayerList = result.toList();
+    });
+
+    if (prayerList.length < 5) {
+      prayerList.removeAt(index);
 
       firestore
           .collection(COMMITMENTS_COLLECTION)
@@ -137,9 +165,9 @@ class FirebaseRepository {
     return user;
   }
 
-  // Get commitment of user of certain type (prayer or servanthood)
-  Future<dynamic> getCommitment(String userId, String commitmentType) async {
-    var commitment;
+  /// Returns servanthood commitment of user as a string
+  Future<String> getServanthoodCommitment(String userId) async {
+    String commitment;
 
     await firestore
         .collection(COMMITMENTS_COLLECTION)
@@ -147,21 +175,29 @@ class FirebaseRepository {
         .get()
         .then((document) {
       if (document.exists) {
-        commitment = document.get(commitmentType);
+        commitment = document.get(SERVANTHOOD_FIELD);
       }
     });
+    print(commitment);
 
     return commitment;
   }
 
-  /// Returns servanthood commitment of user as a string
-  Future<String> getServanthoodCommitment(String userId) async {
-    return getCommitment(userId, SERVANTHOOD_FIELD);
-  }
-
   /// Returns prayer list of user
   Future<List<String>> getPrayerList(String userId) async {
-    return getCommitment(userId, PRAYER_FIELD);
+    List<String> commitment;
+
+    await firestore
+        .collection(COMMITMENTS_COLLECTION)
+        .doc(userId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        commitment = document.get(PRAYER_FIELD).cast<String>();
+      }
+    });
+
+    return commitment;
   }
 
   /// Returns the current score of the user
