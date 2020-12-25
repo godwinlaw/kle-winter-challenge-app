@@ -25,6 +25,7 @@ class WinterChallengeApp extends StatelessWidget {
           print(snapshot.error);
           return MaterialApp(
             title: 'Klesis Winter Challenge',
+            theme: ThemeData(fontFamily: 'Montserrat'),
             home: Home(),
           );
         }

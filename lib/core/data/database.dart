@@ -19,7 +19,7 @@ class FirebaseRepository {
   static const String USERS_COLLECTION = "users";
   static const String COMMITMENTS_COLLECTION = "commitments";
   static const String PROGRESS_COLLECTION = "progress";
-  static const String VERSES_COLLECTION = "verse";
+  static const String VERSES_COLLECTION = "verses";
   static const String POINTS_COLLECTION = "points";
 
   // Field names
