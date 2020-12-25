@@ -48,6 +48,10 @@ class FirebaseRepository {
     });
   }
 
+  void createUserInProgress(String uid) {
+    firestore.collection(PROGRESS_COLLECTION).doc(uid).set({});
+  }
+
   /// Create or updates the commitment of a user in the database
   void updateServanthoodCommitment(String userId, String commitment) {
     firestore
@@ -76,29 +80,32 @@ class FirebaseRepository {
 
   /// UPDATE FUNCTIONS
   // Records the user has completed their servanthood commitment on given week
-  void markCommitmentComplete(String userId, int week, String commitmentType) {
-    firestore
-        .collection(PROGRESS_COLLECTION)
-        .doc(userId)
-        .update({week.toString() + "." + commitmentType: true});
+  void markCommitmentComplete(
+      String userId, int week, String commitmentType, bool complete) {
+    firestore.collection(PROGRESS_COLLECTION).doc(userId).set({
+      week.toString(): {commitmentType: complete}
+    }, new SetOptions(merge: true));
 
     firestore.collection(USERS_COLLECTION).doc(userId).update(
         {SCORE_FIELD: FieldValue.increment(getPointValue(commitmentType))});
   }
 
   // Records the user has memorized their verse for the week
-  void markVerseMemorized(String userId) {
-    markCommitmentComplete(userId, getCurrentWeekNumber(), VERSE_FIELD);
+  void markVerseMemorized(String userId, bool complete) {
+    markCommitmentComplete(
+        userId, getCurrentWeekNumber(), VERSE_FIELD, complete);
   }
 
   // Records the user has completed their servanthood commitment for the week
-  void markServanthoodCommitmentCompleted(String userId) {
-    markCommitmentComplete(userId, getCurrentWeekNumber(), SERVANTHOOD_FIELD);
+  void markServanthoodCommitmentCompleted(String userId, bool complete) {
+    markCommitmentComplete(
+        userId, getCurrentWeekNumber(), SERVANTHOOD_FIELD, complete);
   }
 
   // Records the user has prayed for people for the week
-  void markPrayerCompleted(String userId) {
-    markCommitmentComplete(userId, getCurrentWeekNumber(), PRAYER_FIELD);
+  void markPrayerCompleted(String userId, bool complete) {
+    markCommitmentComplete(
+        userId, getCurrentWeekNumber(), PRAYER_FIELD, complete);
   }
 
   // Sets the year of the user
@@ -131,7 +138,6 @@ class FirebaseRepository {
         user = document;
       }
     });
-
     return user;
   }
 
@@ -292,9 +298,12 @@ class FirebaseRepository {
         .doc(userId)
         .get()
         .then((document) {
-      if (document.exists && document.get(weekNumber.toString)) {
-        tasks = document.get(weekNumber.toString);
-        isCompleted = tasks[commitment];
+      if (document.exists) {
+        Map<String, dynamic> data = document.data();
+        if (data.containsKey(weekNumber.toString())) {
+          tasks = data[weekNumber.toString()];
+          isCompleted = tasks[commitment];
+        }
       }
     });
 

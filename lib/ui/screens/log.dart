@@ -17,7 +17,6 @@ class LogWidget extends StatefulWidget {
 }
 
 class _LogWidgetState extends State<LogWidget> {
-
   final user = auth.FirebaseAuth.instance.currentUser;
 
   List<bool> isSelectedVerse;
@@ -27,14 +26,27 @@ class _LogWidgetState extends State<LogWidget> {
   void initState() {
     FirebaseRepository()
         .isVerseMemorizedForCurrentWeek(user.uid)
-        .then((value) => isSelectedVerse = [value, !value]);
+        .then((value) => isSelectedVerse = [!value, !!value]);
     FirebaseRepository()
         .isServanthoodCompletedForCurrentWeek(user.uid)
-        .then((value) => isSelectedServanthood = [value, !value]);
+        .then((value) => isSelectedServanthood = [!value, !!value]);
 
     super.initState();
   }
 
+  Future<List<bool>> getVerseMemorized() async {
+    await FirebaseRepository()
+        .isVerseMemorizedForCurrentWeek(user.uid)
+        .then((value) => isSelectedVerse = [!value, !!value]);
+    return isSelectedVerse;
+  }
+
+  Future<List<bool>> getServanthood() async {
+    await FirebaseRepository()
+        .isServanthoodCompletedForCurrentWeek(user.uid)
+        .then((value) => isSelectedServanthood = [!value, !!value]);
+    return isSelectedServanthood;
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -99,44 +111,53 @@ class _LogWidgetState extends State<LogWidget> {
             ),
           ),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-            child: ToggleButtons(
-              borderColor: Colors.black,
-              fillColor: Colors.white,
-              borderWidth: 1,
-              selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
-              selectedColor: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-              children: <Widget>[
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
-                  child: Text(
-                    'Not Yet',
-                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
-                  child: Text(
-                    'I did it!',
-                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
-                  ),
-                ),
-              ],
-              onPressed: (int index) {
-                FirebaseRepository().markVerseMemorized(user.uid);
-                setState(() {
-                  for (int i = 0; i < isSelectedVerse.length; i++) {
-                    isSelectedVerse[i] = i == index;
-                  }
-                });
-              },
-              isSelected: isSelectedVerse,
-            ),
-          ), // toggle button
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              child: FutureBuilder<List<bool>>(
+                  future: getVerseMemorized(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return ToggleButtons(
+                          borderColor: Colors.black,
+                          fillColor: Colors.white,
+                          borderWidth: 1,
+                          selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+                          selectedColor: Colors.black,
+                          borderRadius: BorderRadius.circular(12),
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 36.0, vertical: 0),
+                              child: Text(
+                                'Not Yet',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: "Montserrat"),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 36.0, vertical: 0),
+                              child: Text(
+                                'I did it!',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: "Montserrat"),
+                              ),
+                            ),
+                          ],
+                          onPressed: (int index) {
+                            FirebaseRepository()
+                                .markVerseMemorized(user.uid, index == 1);
+                            setState(() {
+                              for (int i = 0; i < isSelectedVerse.length; i++) {
+                                isSelectedVerse[i] = i == index;
+                              }
+                            });
+                          },
+                          isSelected: isSelectedVerse);
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  })), // toggle button
           SizedBox(height: 100),
           Align(
             alignment: Alignment.centerLeft,
@@ -161,42 +182,54 @@ class _LogWidgetState extends State<LogWidget> {
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-            child: ToggleButtons(
-              borderColor: Colors.black,
-              fillColor: Colors.white,
-              borderWidth: 1,
-              selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
-              selectedColor: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-              children: <Widget>[
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
-                  child: Text(
-                    'Not Yet',
-                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 36.0, vertical: 0),
-                  child: Text(
-                    'I did it!',
-                    style: TextStyle(fontSize: 12, fontFamily: "Montserrat"),
-                  ),
-                ),
-              ],
-              onPressed: (int index) {
-                FirebaseRepository()
-                    .markServanthoodCommitmentCompleted(user.uid);
-                setState(() {
-                  for (int i = 0; i < isSelectedServanthood.length; i++) {
-                    isSelectedServanthood[i] = i == index;
+            child: FutureBuilder<List<bool>>(
+                future: getServanthood(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return ToggleButtons(
+                      borderColor: Colors.black,
+                      fillColor: Colors.white,
+                      borderWidth: 1,
+                      selectedBorderColor: Color.fromRGBO(234, 197, 103, 1),
+                      selectedColor: Colors.black,
+                      borderRadius: BorderRadius.circular(12),
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 36.0, vertical: 0),
+                          child: Text(
+                            'Not Yet',
+                            style: TextStyle(
+                                fontSize: 12, fontFamily: "Montserrat"),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 36.0, vertical: 0),
+                          child: Text(
+                            'I did it!',
+                            style: TextStyle(
+                                fontSize: 12, fontFamily: "Montserrat"),
+                          ),
+                        ),
+                      ],
+                      onPressed: (int index) {
+                        FirebaseRepository().markServanthoodCommitmentCompleted(
+                            user.uid, index == 1);
+                        setState(() {
+                          for (int i = 0;
+                              i < isSelectedServanthood.length;
+                              i++) {
+                            isSelectedServanthood[i] = i == index;
+                          }
+                        });
+                      },
+                      isSelected: isSelectedServanthood,
+                    );
+                  } else {
+                    return CircularProgressIndicator();
                   }
-                });
-              },
-              isSelected: isSelectedServanthood,
-            ),
+                }),
           ),
           SizedBox(height: 100),
           Align(
