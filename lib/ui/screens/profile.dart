@@ -5,6 +5,7 @@ import 'package:winterchallenge/core/data/database.dart';
 import '../../core/services/auth.dart';
 
 final user = auth.FirebaseAuth.instance.currentUser;
+final firebaseRepository = new FirebaseRepository();
 
 /// Used for log out
 
@@ -23,6 +24,33 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   String name;
   bool isBrother;
   ImageProvider profileImage;
+
+  String servanthood;
+  bool isEditingServanthood;
+
+  List<String> prayerList;
+  bool isEditingPrayer;
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO: init with user data
+    name = user.displayName;
+    isBrother = true;
+    photoUrl = user.photoURL;
+
+    if (photoUrl != "") {
+      profileImage = NetworkImage(photoUrl);
+    } else {
+      profileImage = AssetImage(
+          isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
+    }
+
+    servanthood = "Code the winter challenge app";
+    prayerList = ["Toby", "Michael", "Merryle", "Emilio", "Chibuzor"];
+    isEditingServanthood = false;
+    isEditingPrayer = false;
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(

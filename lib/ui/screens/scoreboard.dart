@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:winterchallenge/core/data/database.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 /// Screen for viewing the scoreboard.
 ///
@@ -11,6 +13,9 @@ class ScoreboardWidget extends StatefulWidget {
 }
 
 class _ScoreboardWidgetState extends State<ScoreboardWidget> {
+  final firebaseRepository = new FirebaseRepository();
+  final user = auth.FirebaseAuth.instance.currentUser;
+
   @override
   Widget build(BuildContext context) {
     return scoreboardTab();
@@ -63,7 +68,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
                 ]),
           ),
           body: TabBarView(children: [
-            classList(),
+            year(),
             gender(),
             individualYearTab(),
           ]),
@@ -72,7 +77,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
 
   DefaultTabController individualYearTab() {
     return DefaultTabController(
-        length: 4,
+        length: 5,
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.white,
@@ -113,14 +118,21 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
                       child: Text("Freshmen"),
                     ),
                   ),
+                  Tab(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text("Staff"),
+                    ),
+                  ),
                 ]),
           ),
           body: TabBarView(
             children: [
-              individualList("Seniors"),
-              individualList("Juniors"),
-              individualList("Sophomores"),
-              individualList("Freshmen"),
+              individual(YearInSchool.Senior),
+              individual(YearInSchool.Junior),
+              individual(YearInSchool.Sophomore),
+              individual(YearInSchool.Freshmen),
+              individual(YearInSchool.Staff),
             ],
             physics: NeverScrollableScrollPhysics(),
           ),
@@ -137,11 +149,46 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   // the second element of the list corresponds to a list of the points in order of the points
   // the third element of the list is the number of years (should be 4 for most cases)
   // the first and second elements of the list should match up
-  List<List> getClassRankedData() {
-    List<String> years = ["Seniors", "Juniors", "Sophomores", "Freshmen"];
-    List<int> points = [300, 200, 160, 30];
-    List<int> number = [years.length];
-    return [years, points, number];
+
+  Future<List<List>> getYearData() async {
+    List<int> points = [];
+    Map<YearInSchool, int> scoresByYear;
+    await firebaseRepository
+        .getScoresByYear()
+        .then((value) => scoresByYear = value);
+    if (!scoresByYear.containsKey(YearInSchool.Senior)) {
+      points.add(0);
+    } else {
+      points.add(scoresByYear[YearInSchool.Senior]);
+    }
+    if (!scoresByYear.containsKey(YearInSchool.Junior)) {
+      points.add(0);
+    } else {
+      points.add(scoresByYear[YearInSchool.Junior]);
+    }
+    if (!scoresByYear.containsKey(YearInSchool.Sophomore)) {
+      points.add(0);
+    } else {
+      points.add(scoresByYear[YearInSchool.Sophomore]);
+    }
+    if (!scoresByYear.containsKey(YearInSchool.Freshmen)) {
+      points.add(0);
+    } else {
+      points.add(scoresByYear[YearInSchool.Freshmen]);
+    }
+    if (!scoresByYear.containsKey(YearInSchool.Staff)) {
+      points.add(0);
+    } else {
+      points.add(scoresByYear[YearInSchool.Staff]);
+    }
+    List<String> years = [
+      "Seniors",
+      "Juniors",
+      "Sophomores",
+      "Freshmen",
+      "Staff"
+    ];
+    return [years, points];
   }
 
   // takes in the class year and points
@@ -157,7 +204,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
           contentPadding:
               EdgeInsets.symmetric(vertical: 25.0, horizontal: 30.0),
           title: Text(
-            classYear,
+            classYear.toString(),
             textScaleFactor: 1.5,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -170,20 +217,27 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     );
   }
 
-  ListView classList() {
-    List<List> data = getClassRankedData();
-    List<String> years = data.elementAt(0);
-    List<int> points = data.elementAt(1);
-    List<int> number = data.elementAt(2);
-    int num = number.elementAt(0);
-    return ListView(children: <Widget>[
-      // making space between tab bar and the first card (space up top)
-      Container(
-        padding: EdgeInsets.symmetric(vertical: 15.0),
-      ),
-      for (var i = 0; i < num; i++)
-        classTile(years.elementAt(i), points.elementAt(i))
-    ]);
+  FutureBuilder year() {
+    return FutureBuilder<List<List>>(
+        future: getYearData(),
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<List> data = snapshot.data;
+            List<String> years = data.elementAt(0);
+            List<int> points = data.elementAt(1);
+            return ListView(children: <Widget>[
+              // making space between tab bar and the first card (space up top)
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 15.0),
+              ),
+              for (var i = 0; i < years.length; i++)
+                classTile(years[i], points[i]),
+            ]);
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 
 // Functionality for gender tab
@@ -192,10 +246,15 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
   // returns a list of a list
   // the first element of the list corresponds to a list of the gender
   // the second element of the list corresponds to a list of the pointsnts
-  // the first and second elements of the list should match up
-  List<List> getGenderData() {
+  Future<List<List>> getGenderData() async {
+    List<int> points = [];
+    Map<Gender, int> scoresByGender;
+    await firebaseRepository
+        .getScoresByGender()
+        .then((value) => scoresByGender = value);
+    points.add(scoresByGender[Gender.Female]);
+    points.add(scoresByGender[Gender.Male]);
     List<String> years = ["SISTERS", "BROTHERS"];
-    List<int> points = [240, 30];
     return [years, points];
   }
 
@@ -240,30 +299,36 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     );
   }
 
-  Container gender() {
-    List<List> data = getGenderData();
-    List<String> gender = data.elementAt(0);
-    List<int> points = data.elementAt(1);
-    return Container(
-      //padding: EdgeInsets.symmetric(vertical: 120.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          genderTile(gender.elementAt(0), points.elementAt(0)),
-          genderTile(gender.elementAt(1), points.elementAt(1))
-        ],
-      ),
-    );
+  FutureBuilder gender() {
+    return FutureBuilder<List<List>>(
+        future: getGenderData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<List> data = snapshot.data;
+            List<String> gender = data.elementAt(0);
+            List<int> points = data.elementAt(1);
+
+            return Container(
+              //padding: EdgeInsets.symmetric(vertical: 120.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  genderTile(gender.elementAt(0), points.elementAt(0)),
+                  genderTile(gender.elementAt(1), points.elementAt(1))
+                ],
+              ),
+            );
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 
 // Functionality for individual tab
-
-  // TODO: add in functionality for photos of people
-  //    (change the leading part of the Flutter Logo; take in one more argument)
-  // given name, points, and rank of an individual,
   // returns a container that creates a tile for the person on the Individual tab under their year
-  Container individualTile(String name, int points, int rank) {
+  Container individualTile(
+      String name, String points, String profile, String gender, int rank) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 15.0),
       child: new Card(
@@ -275,7 +340,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
               EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
           leading: Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
             Text(rank.toString() + "   "),
-            FlutterLogo(),
+            profilePicture(profile, gender),
           ]),
           title: Text(
             name,
@@ -291,34 +356,77 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
     );
   }
 
-  // TODO: add in functionality for photos of people (put that as the 4th data point)
-  // DATA:
-  // given the class year, gets all the people in that year
-  // returns a list of a list
-  // the first element of the list corresponds to a list of the people in order of their points
-  // the second element of the list corresponds to a list of the points in order of the points
-  // the third element of the list is the number of people in the year
-  // the first and second elements of the list should match up
-  List<List> getIndividualRankedData(String classYear) {
-    List<String> names = ["Sarah", "John", "Chloe"];
-    List<int> points = [150, 60, 30];
-    List<int> number = [names.length];
-    return [names, points, number];
+  Widget _profilePic(ImageProvider image) => Stack(
+        alignment: const Alignment(0.6, 0.6),
+        children: [
+          CircleAvatar(
+            backgroundImage: image,
+            backgroundColor: Colors.white,
+            radius: 25,
+          )
+        ],
+      );
+
+  Widget profilePicture(String photoUrl, String gender) {
+    ImageProvider profileImage;
+    print(gender);
+    bool isBrother;
+    if (gender != null && gender == "Gender.Female") {
+      isBrother = false;
+    } else {
+      isBrother = true;
+    }
+
+    if (photoUrl != "") {
+      profileImage = NetworkImage(photoUrl);
+    } else {
+      profileImage = AssetImage(
+          isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
+    }
+    return _profilePic(profileImage);
   }
 
-  // TODO: add in functionality for photos of people (get from individual data; pass it into individual)
-  ListView individualList(String classYear) {
-    List<List> data = getIndividualRankedData(classYear);
-    List<String> names = data.elementAt(0);
-    List<int> points = data.elementAt(1);
-    List<int> number = data.elementAt(2);
-    int numInYear = number.elementAt(0);
+  Future<List<List>> getIndividualData(YearInSchool year) async {
+    List<String> points = [];
+    List<String> names = [];
+    List<String> profiles = [];
+    List<String> gender = [];
+    List<Map<String, String>> individualScores;
+    await firebaseRepository
+        .getRankedScoreForIndividuals(year)
+        .then((value) => individualScores = value);
+    for (int i = 0; i < individualScores.length; i++) {
+      if (individualScores[i] != null) {
+        names.add(individualScores[i][FirebaseRepository.FULL_NAME_FIELD]);
+        points.add(individualScores[i][FirebaseRepository.SCORE_FIELD]);
+        profiles.add(individualScores[i][FirebaseRepository.PROFILE_URL_FIELD]);
+        gender.add(individualScores[i][FirebaseRepository.GENDER_FIELD]);
+      }
+    }
+    return [names, points, profiles, gender];
+  }
 
-    return ListView(
-        // replace i with the number of individuals in the class
-        children: <Widget>[
-          for (var i = 0; i < numInYear; i++)
-            individualTile(names.elementAt(i), points.elementAt(i), i + 1)
-        ]);
+  FutureBuilder individual(YearInSchool year) {
+    return FutureBuilder<List<List>>(
+        future: getIndividualData(year),
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<List> data = snapshot.data;
+            List<String> names = data.elementAt(0);
+            List<String> points = data.elementAt(1);
+            List<String> profiles = data.elementAt(2);
+            List<String> gender = data.elementAt(3);
+            return ListView(
+                // replace i with the number of individuals in the class
+                children: <Widget>[
+                  for (var i = 0; i < names.length; i++)
+                    individualTile(names.elementAt(i), points.elementAt(i),
+                        profiles.elementAt(i), gender.elementAt(i), i + 1)
+                ]);
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 }

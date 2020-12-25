@@ -5,14 +5,14 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:winterchallenge/core/data/database.dart';
 
-final firebaseRepository = new FirebaseRepository();
-
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final firebaseRepository = new FirebaseRepository();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
