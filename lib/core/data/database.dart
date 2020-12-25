@@ -116,10 +116,11 @@ class FirebaseRepository {
       week.toString(): {commitmentType: complete}
     }, new SetOptions(merge: true));
 
-    if (complete) {
-      firestore.collection(USERS_COLLECTION).doc(userId).update(
-          {SCORE_FIELD: FieldValue.increment(getPointValue(commitmentType))});
-    }
+    firestore.collection(USERS_COLLECTION).doc(userId).update({
+      SCORE_FIELD: complete
+          ? FieldValue.increment(getPointValue(commitmentType))
+          : FieldValue.increment(-1 * getPointValue(commitmentType))
+    });
   }
 
   // Records the user has memorized their verse for the week
