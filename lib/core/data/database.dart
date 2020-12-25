@@ -50,6 +50,10 @@ class FirebaseRepository {
     });
   }
 
+  void createUserInProgress(String uid) {
+    firestore.collection(PROGRESS_COLLECTION).doc(uid).set({});
+  }
+
   /// Create or updates the commitment of a user in the database
   void updateServanthoodCommitment(String userId, String commitment) {
     firestore
@@ -106,29 +110,32 @@ class FirebaseRepository {
 
   /// UPDATE FUNCTIONS
   // Records the user has completed their servanthood commitment on given week
-  void markCommitmentComplete(String userId, int week, String commitmentType) {
-    firestore
-        .collection(PROGRESS_COLLECTION)
-        .doc(userId)
-        .update({week.toString() + "." + commitmentType: true});
+  void markCommitmentComplete(
+      String userId, int week, String commitmentType, bool complete) {
+    firestore.collection(PROGRESS_COLLECTION).doc(userId).set({
+      week.toString(): {commitmentType: complete}
+    }, new SetOptions(merge: true));
 
     firestore.collection(USERS_COLLECTION).doc(userId).update(
         {SCORE_FIELD: FieldValue.increment(getPointValue(commitmentType))});
   }
 
   // Records the user has memorized their verse for the week
-  void markVerseMemorized(String userId) {
-    markCommitmentComplete(userId, getCurrentWeekNumber(), VERSE_FIELD);
+  void markVerseMemorized(String userId, bool complete) {
+    markCommitmentComplete(
+        userId, getCurrentWeekNumber(), VERSE_FIELD, complete);
   }
 
   // Records the user has completed their servanthood commitment for the week
-  void markServanthoodCommitmentCompleted(String userId) {
-    markCommitmentComplete(userId, getCurrentWeekNumber(), SERVANTHOOD_FIELD);
+  void markServanthoodCommitmentCompleted(String userId, bool complete) {
+    markCommitmentComplete(
+        userId, getCurrentWeekNumber(), SERVANTHOOD_FIELD, complete);
   }
 
   // Records the user has prayed for people for the week
-  void markPrayerCompleted(String userId) {
-    markCommitmentComplete(userId, getCurrentWeekNumber(), PRAYER_FIELD);
+  void markPrayerCompleted(String userId, bool complete) {
+    markCommitmentComplete(
+        userId, getCurrentWeekNumber(), PRAYER_FIELD, complete);
   }
 
   // Sets the year of the user
@@ -161,8 +168,6 @@ class FirebaseRepository {
         user = document.data();
       }
     });
-    print(user);
-
     return user;
   }
 
@@ -259,7 +264,7 @@ class FirebaseRepository {
               if (scoresByYear[year] == null) {
                 scoresByYear[year] = 0;
               }
-              scoresByYear[year] += int.parse(data[SCORE_FIELD]);
+              scoresByYear[year] += data[SCORE_FIELD];
             }
           })
         });
@@ -288,10 +293,8 @@ class FirebaseRepository {
         .collection(USERS_COLLECTION)
         .where(GENDER_FIELD, isEqualTo: Gender.Female.toString())
         .get()
-        .then((data) => {
-              data.docs.forEach(
-                  (doc) => femaleCounter += (int.parse(doc[SCORE_FIELD])))
-            });
+        .then((data) =>
+            {data.docs.forEach((doc) => femaleCounter += doc[SCORE_FIELD])});
 
     int maleCounter = 0;
     await firestore
@@ -299,10 +302,8 @@ class FirebaseRepository {
         .where('gender', isEqualTo: Gender.Male.toString())
         .get()
         .then((data) => {
-              data.docs.forEach((doc) => maleCounter += (int.parse(
-                  doc.data().containsKey(SCORE_FIELD)
-                      ? doc[SCORE_FIELD]
-                      : '0')))
+              data.docs.forEach((doc) => maleCounter +=
+                  doc.data().containsKey(SCORE_FIELD) ? doc[SCORE_FIELD] : 0)
             });
     return {Gender.Male: maleCounter, Gender.Female: femaleCounter};
   }
@@ -322,8 +323,9 @@ class FirebaseRepository {
                 FULL_NAME_FIELD: data.containsKey(FULL_NAME_FIELD)
                     ? data[FULL_NAME_FIELD]
                     : '',
-                SCORE_FIELD:
-                    data.containsKey(SCORE_FIELD) ? data[SCORE_FIELD] : '0',
+                SCORE_FIELD: data.containsKey(SCORE_FIELD)
+                    ? data[SCORE_FIELD].toString()
+                    : '0',
                 PROFILE_URL_FIELD: data.containsKey(PROFILE_URL_FIELD)
                     ? data[PROFILE_URL_FIELD]
                     : '',
@@ -338,16 +340,20 @@ class FirebaseRepository {
   Future<bool> isCommitmentCompletedForWeek(
       String userId, String commitment, int weekNumber) async {
     bool isCompleted = false;
-    var tasks;
 
     await firestore
         .collection(PROGRESS_COLLECTION)
         .doc(userId)
         .get()
         .then((document) {
-      if (document.exists && document.get(weekNumber.toString)) {
-        tasks = document.get(weekNumber.toString);
-        isCompleted = tasks[commitment];
+      if (document.exists) {
+        Map<String, dynamic> data = document.data();
+        if (data.containsKey(weekNumber.toString())) {
+          Map<String, dynamic> tasks = data[weekNumber.toString()];
+          if (tasks.containsKey(commitment)) {
+            isCompleted = !!tasks[commitment];
+          }
+        }
       }
     });
 

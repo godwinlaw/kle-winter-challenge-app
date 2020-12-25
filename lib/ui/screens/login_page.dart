@@ -40,7 +40,9 @@ class _LoginPageState extends State<LoginPage> {
         await signInWithGoogle().then((auth.User firebaseUser) async {
           if (firebaseUser != null) {
             // If it is a new user, create a user in the database
-            if (firebaseRepository.getUserDetails(firebaseUser.uid) != null) {
+            var userDetails =
+                await firebaseRepository.getUserDetails(firebaseUser.uid);
+            if (userDetails == null) {
               print('Creating new user in Database');
               firebaseRepository.createUserWithGoogleProvider(firebaseUser);
             }
