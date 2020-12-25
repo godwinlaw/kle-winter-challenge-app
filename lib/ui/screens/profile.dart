@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:winterchallenge/core/data/database.dart';
 import 'package:winterchallenge/ui/screens/login_page.dart';
 import '../../core/services/auth.dart';
+
+final user = auth.FirebaseAuth.instance.currentUser;
 
 /// Used for log out
 
@@ -18,16 +19,10 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
-  final user = auth.FirebaseAuth.instance.currentUser;
-  final firebaseRepository = new FirebaseRepository();
-
   String name;
   bool isBrother;
   String photoUrl;
   ImageProvider profileImage;
-
-  String servanthood;
-  List<String> prayerList;
 
   @override
   void initState() {
@@ -43,7 +38,8 @@ class _ProfileWidgetState extends State<ProfileWidget> {
 
     // TODO: if accessing key from user Map works, apply to all fields
     // instead of making separate firebaseRepository calls
-    isBrother = userInfo["gender"] == Gender.Male;
+    // isBrother = userInfo["gender"] == Gender.Male;
+    isBrother = false;
 
     photoUrl = user.photoURL;
     if (photoUrl != null) {
@@ -52,14 +48,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       profileImage = AssetImage(
           isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
     }
-
-    firebaseRepository
-        .getServanthoodCommitment(user.uid)
-        .then((value) => servanthood = value);
-
-    firebaseRepository
-        .getPrayerList(user.uid)
-        .then((value) => prayerList = value);
   }
 
   @override
@@ -72,37 +60,41 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             backgroundColor: Colors.white,
             elevation: 0,
             brightness: Brightness.light),
-        body: Container(
-            margin: const EdgeInsets.only(left: 20.0, right: 20.0),
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+        body: Center(
+            child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(20.0),
                 children: [
-                  _profilePic(profileImage),
-                  Text(
-                    name,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
-                  ),
-                  individualTile(
-                    ListTile(
-                        title: Text('Memory Verses',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black)),
-                        trailing: IconButton(
-                          icon: Icon(Icons.arrow_forward_ios_rounded),
-                          onPressed: () {
-                            // TODO: display memory verses in another page
-                          },
-                        )),
-                  ),
-                  individualTile(TextfieldWidget()),
-                  individualTile(_PrayerChipWidget(people: prayerList)),
-                  _logOutWidget(context)
-                ])),
+              Container(
+                  alignment: Alignment.center,
+                  child: Column(children: [
+                    _profilePic(profileImage),
+                    Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+                    ),
+                  ])),
+              individualTile(
+                ListTile(
+                    title: Text('Memory Verses',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black)),
+                    trailing: IconButton(
+                      icon: Icon(Icons.arrow_forward_ios_rounded),
+                      onPressed: () {
+                        // TODO: display memory verses in another page
+                      },
+                    )),
+              ),
+              individualTile(ServanthoodWidget()),
+              individualTile(_PrayerChipWidget()),
+              _logOutWidget(context)
+            ])),
       );
 }
 
@@ -166,18 +158,20 @@ Widget _profilePic(ImageProvider image) => Stack(
       ],
     );
 
-class TextfieldWidget extends StatefulWidget {
-  final TextEditingController _editingController = TextEditingController();
-  String initialText = 'Write your commitment here!';
-
+class ServanthoodWidget extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return _TextfieldWidgetState();
-  }
+  State<StatefulWidget> createState() => _ServanthoodWidgetState();
 }
 
-class _TextfieldWidgetState extends State<TextfieldWidget> {
+class _ServanthoodWidgetState extends State<ServanthoodWidget> {
   bool _isEditingText = false;
+  String editText = 'Write your commitment here!';
+  TextEditingController _editingController = TextEditingController();
+
+  TextEditingController _newTextController(String init) {
+    _editingController = TextEditingController(text: init);
+    return _editingController;
+  }
 
   @override
   Widget build(BuildContext context) => ListTile(
@@ -186,61 +180,87 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
                 color: Colors.black)),
-        subtitle: _editTitleTextField(),
+        subtitle: _servanthoodTextField(),
         trailing: IconButton(
           icon: Icon(Icons.edit),
           onPressed: () {
             setState(() {
               _isEditingText = !_isEditingText;
+              if (!_isEditingText) {
+                firebaseRepository
+                    .getServanthoodCommitment(user.uid)
+                    .then((value) => editText = value);
+              }
             });
           },
         ),
+        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
       );
 
-  Widget _editTitleTextField() {
-    if (_isEditingText)
-      return Column(children: [
-        TextField(
-          onSubmitted: (newValue) {
-            setState(() {
-              widget.initialText = newValue;
-              _isEditingText = false;
-            });
-          },
-          autofocus: true,
-          controller: widget._editingController,
-        ),
-        new RaisedButton(
-          child: new Text("Done Editing"),
-          onPressed: () {
-            setState(() {
-              widget.initialText = widget._editingController.text;
-              _isEditingText = false;
-            });
-          },
-        ),
-      ]);
-    return InkWell(
-        child: Text(
-      widget.initialText,
-      style: TextStyle(
-        color: Colors.black,
-        fontSize: 14.0,
-      ),
-    ));
-  }
+  FutureBuilder _servanthoodTextField() => FutureBuilder<String>(
+      future: firebaseRepository.getServanthoodCommitment(user.uid),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          editText = snapshot.data;
+          if (_isEditingText)
+            return Column(children: [
+              TextField(
+                  onSubmitted: (newValue) {
+                    setState(() {
+                      editText = newValue;
+                      firebaseRepository.updateServanthoodCommitment(
+                          user.uid, _editingController.text);
+                      _isEditingText = false;
+                    });
+                  },
+                  autofocus: true,
+                  controller: _newTextController(editText)),
+              new RaisedButton(
+                child: new Text("Done Editing"),
+                onPressed: () {
+                  setState(() {
+                    editText = _editingController.text;
+                    firebaseRepository.updateServanthoodCommitment(
+                        user.uid, _editingController.text);
+                    _isEditingText = false;
+                  });
+                },
+              ),
+            ]);
+          return InkWell(
+              child: Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    editText,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                    ),
+                  )));
+        } else {
+          return Column(children: <Widget>[
+            SizedBox(
+              child: CircularProgressIndicator(),
+              width: 60,
+              height: 60,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text('Awaiting result...'),
+            )
+          ]);
+        }
+      });
 
   @override
   void dispose() {
-    widget._editingController.dispose();
+    _editingController.dispose();
     super.dispose();
   }
 }
 
 class _PrayerChipWidget extends StatefulWidget {
+  _PrayerChipWidget({Key key}) : super(key: key);
   List<String> people;
-
-  _PrayerChipWidget({Key key, @required this.people}) : super(key: key);
 
   @override
   _PrayerChipWidgetState createState() => new _PrayerChipWidgetState();
@@ -256,40 +276,64 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
     super.dispose();
   }
 
-  Widget buildChips() {
-    List<Widget> chips = new List();
-
-    if (isEditing) {
-      for (int i = 0; i < widget.people.length; i++) {
-        InputChip actionChip = InputChip(
-          label: Text(widget.people[i]),
-          elevation: 10,
-          pressElevation: 5,
-          shadowColor: Colors.lightBlue,
-          onDeleted: () {
-            widget.people.removeAt(i);
-
-            setState(() {
-              widget.people = widget.people;
-            });
-          },
-        );
-        chips.add(actionChip);
-      }
-    } else {
-      // no delete
-      for (int i = 0; i < widget.people.length; i++) {
-        InputChip actionChip = InputChip(
-            label: Text(widget.people[i]),
-            elevation: 10,
-            pressElevation: 5,
-            shadowColor: Colors.lightBlue);
-        chips.add(actionChip);
-      }
-    }
-
-    return Wrap(spacing: 6.0, children: chips);
-  }
+  FutureBuilder buildChips() => FutureBuilder<List<String>>(
+      future: firebaseRepository.getPrayerList(user.uid),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Widget> chips = new List();
+          widget.people = snapshot.data;
+          if (isEditing) {
+            for (int i = 0; i < widget.people.length; i++) {
+              InputChip actionChip = InputChip(
+                label: Text(widget.people[i]),
+                elevation: 10,
+                pressElevation: 5,
+                shadowColor: Colors.lightBlue,
+                onDeleted: () {
+                  widget.people.removeAt(i);
+                  firebaseRepository.updatePrayerCommitment(
+                      user.uid, widget.people);
+                  setState(() {
+                    widget.people = widget.people;
+                  });
+                },
+              );
+              chips.add(actionChip);
+            }
+          } else {
+            // no delete
+            for (int i = 0; i < widget.people.length; i++) {
+              InputChip actionChip = InputChip(
+                  label: Text(widget.people[i]),
+                  elevation: 10,
+                  pressElevation: 5,
+                  shadowColor: Colors.lightBlue);
+              chips.add(actionChip);
+            }
+          }
+          return Wrap(spacing: 6.0, children: chips);
+        } else if (snapshot.hasError) {
+          return Column(children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child:
+                  Text('Enter some names of people you\'d like to pray for!'),
+            )
+          ]);
+        } else {
+          return Column(children: <Widget>[
+            SizedBox(
+              child: CircularProgressIndicator(),
+              width: 60,
+              height: 60,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text('Awaiting result...'),
+            )
+          ]);
+        }
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -301,11 +345,22 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
       inner = TextFormField(
         controller: _textEditingController,
         onFieldSubmitted: (text) {
+          if (widget.people == null) {
+            widget.people = new List<String>();
+          }
           if (widget.people.length < 5) {
             widget.people.add(text);
+          } else {
+            print("maximum of 5 people reached.");
           }
+          firebaseRepository.updatePrayerCommitment(user.uid, widget.people);
           _textEditingController.clear();
 
+          print("added new prayer target");
+          firebaseRepository.getPrayerList(user.uid).then((result) {
+            // widget.people = result;
+            print(result);
+          });
           setState(() {
             widget.people = widget.people;
           });
