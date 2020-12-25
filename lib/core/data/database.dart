@@ -212,7 +212,7 @@ class FirebaseRepository {
               if (scoresByYear[year] == null) {
                 scoresByYear[year] = 0;
               }
-              scoresByYear[year] += int.parse(data[SCORE_FIELD]);
+              scoresByYear[year] += data[SCORE_FIELD];
             }
           })
         });
@@ -241,10 +241,8 @@ class FirebaseRepository {
         .collection(USERS_COLLECTION)
         .where(GENDER_FIELD, isEqualTo: Gender.Female.toString())
         .get()
-        .then((data) => {
-              data.docs.forEach(
-                  (doc) => femaleCounter += (int.parse(doc[SCORE_FIELD])))
-            });
+        .then((data) =>
+            {data.docs.forEach((doc) => femaleCounter += doc[SCORE_FIELD])});
 
     int maleCounter = 0;
     await firestore
@@ -252,10 +250,8 @@ class FirebaseRepository {
         .where('gender', isEqualTo: Gender.Male.toString())
         .get()
         .then((data) => {
-              data.docs.forEach((doc) => maleCounter += (int.parse(
-                  doc.data().containsKey(SCORE_FIELD)
-                      ? doc[SCORE_FIELD]
-                      : '0')))
+              data.docs.forEach((doc) => maleCounter +=
+                  doc.data().containsKey(SCORE_FIELD) ? doc[SCORE_FIELD] : 0)
             });
     return {Gender.Male: maleCounter, Gender.Female: femaleCounter};
   }
@@ -275,8 +271,9 @@ class FirebaseRepository {
                 FULL_NAME_FIELD: data.containsKey(FULL_NAME_FIELD)
                     ? data[FULL_NAME_FIELD]
                     : '',
-                SCORE_FIELD:
-                    data.containsKey(SCORE_FIELD) ? data[SCORE_FIELD] : '0',
+                SCORE_FIELD: data.containsKey(SCORE_FIELD)
+                    ? data[SCORE_FIELD].toString()
+                    : '0',
                 PROFILE_URL_FIELD: data.containsKey(PROFILE_URL_FIELD)
                     ? data[PROFILE_URL_FIELD]
                     : '',
