@@ -67,9 +67,11 @@ class _LogWidgetState extends State<LogWidget> {
   Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+          centerTitle: true,
           title: const Text(
             'Track your progress',
             style: TextStyle(
+              fontFamily: "Montserrat",
               color: Colors.black,
               fontSize: 18,
             ),

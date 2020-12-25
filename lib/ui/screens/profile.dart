@@ -31,6 +31,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   List<String> prayerList;
   bool isEditingPrayer;
 
+  Gender gender;
+  YearInSchool year;
+
   @override
   void initState() {
     super.initState();
@@ -52,12 +55,19 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     isEditingPrayer = false;
   }
 
+  Future<void> initStateForProfile() async {
+    gender = await firebaseRepository.getGender(user.uid);
+    year = await firebaseRepository.getYear(user.uid);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
+            centerTitle: true,
             title: const Text(
               'Profile',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(
+                  fontSize: 20, color: Colors.black, fontFamily: "Montserrat"),
             ),
             backgroundColor: Colors.white,
             elevation: 0,
@@ -68,36 +78,134 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                 padding: const EdgeInsets.all(20.0),
                 children: [
               Container(
+                  padding: EdgeInsets.only(bottom: 20),
                   alignment: Alignment.center,
                   child: Column(children: [
                     _profilePic(),
+                    SizedBox(height: 10),
                     Text(
                       user.displayName,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Montserrat",
+                          fontSize: 28),
                     ),
                   ])),
-              individualTile(
-                ListTile(
-                    title: Text('Memory Verses',
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black)),
-                    trailing: IconButton(
-                      icon: Icon(Icons.arrow_forward_ios_rounded),
-                      onPressed: () {
-                        // TODO: display memory verses in another page
-                      },
-                    )),
-              ),
+              individualTile(genderPicker()),
+              individualTile(yearPicker()),
+              // individualTile(
+              //   ListTile(
+              //       title: Text('Memory Verses',
+              //           style: TextStyle(
+              //               fontSize: 20,
+              //               fontWeight: FontWeight.w500,
+              //               color: Colors.black)),
+              //       trailing: IconButton(
+              //         icon: Icon(Icons.arrow_forward_ios_rounded),
+              //         onPressed: () {
+              //           // TODO: display memory verses in another page
+              //         },
+              //       )),
+              // ),
               individualTile(ServanthoodWidget()),
               individualTile(_PrayerChipWidget()),
               _logOutWidget(context)
             ])),
       );
+
+  FutureBuilder genderPicker() {
+    return FutureBuilder(
+        future: initStateForProfile(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Column(children: [
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                      padding: EdgeInsets.only(left: 20, top: 20),
+                      child: Text('Gender',
+                          style: TextStyle(
+                              fontFamily: "Montserrat",
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black)))),
+              RadioListTile(
+                title: const Text('Male'),
+                value: Gender.Male,
+                groupValue: gender,
+                onChanged: (Gender value) {
+                  firebaseRepository.setGender(user.uid, value);
+                  setState(() {
+                    gender = value;
+                  });
+                },
+              ),
+              RadioListTile(
+                title: const Text('Female'),
+                value: Gender.Female,
+                groupValue: gender,
+                onChanged: (Gender value) {
+                  setState(() {
+                    firebaseRepository.setGender(user.uid, value);
+                    gender = value;
+                  });
+                },
+              ),
+            ]);
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
+  }
+
+  FutureBuilder yearPicker() {
+    return FutureBuilder(
+        future: initStateForProfile(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Column(children: [
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                      padding: EdgeInsets.only(left: 20, top: 20),
+                      child: Text('Year',
+                          style: TextStyle(
+                              fontFamily: "Montserrat",
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black)))),
+              yearDropdown()
+            ]);
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
+  }
+
+  Widget yearDropdown() {
+    return Container(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+        child: DropdownButton<YearInSchool>(
+          value: year,
+          isExpanded: true,
+          elevation: 1,
+          onChanged: (YearInSchool newValue) {
+            firebaseRepository.setYear(user.uid, newValue);
+            setState(() {
+              year = newValue;
+            });
+          },
+          items: YearInSchool.values
+              .map<DropdownMenuItem<YearInSchool>>((YearInSchool value) {
+            return DropdownMenuItem<YearInSchool>(
+              value: value,
+              child: Text(value.toString().substring(13)),
+            );
+          }).toList(),
+        ));
+  }
 }
 
 /// A button that logs the user out when pressed, then returns to login page
@@ -123,6 +231,7 @@ Widget _logOutWidget(BuildContext context) {
             child: Text(
               'Log Out',
               style: TextStyle(
+                fontFamily: "Montserrat",
                 fontSize: 20,
                 color: Colors.black,
               ),
@@ -148,7 +257,6 @@ Container individualTile(Widget tileChild) {
 
 Future<ImageProvider> _getProfilePic() async {
   ImageProvider result;
-  print("getting profile pic");
   await firebaseRepository.getUserDetails(user.uid).then((value) {
     bool isBrother = value["gender"] == Gender.Male;
     print("gender: " + value["gender"]);
@@ -169,7 +277,6 @@ FutureBuilder _profilePic() => FutureBuilder<Gender>(
     builder: (context, snapshot) {
       ImageProvider img;
       if (user.photoURL != null) {
-        print("google photo");
         img = NetworkImage(user.photoURL);
       } else {
         img = AssetImage("assets/default_man.jpeg");
@@ -179,7 +286,6 @@ FutureBuilder _profilePic() => FutureBuilder<Gender>(
         Gender gender = snapshot.data;
         bool isBrother = gender == Gender.Male;
         if (user.photoURL == null) {
-          print("default photo");
           img = AssetImage(isBrother
               ? "assets/default_man.jpeg"
               : "assets/default_woman.jpeg");
@@ -212,6 +318,7 @@ class _ServanthoodWidgetState extends State<ServanthoodWidget> {
   Widget build(BuildContext context) => ListTile(
         title: Text('Servanthood',
             style: TextStyle(
+                fontFamily: "Montserrat",
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
                 color: Colors.black)),
@@ -268,6 +375,7 @@ class _ServanthoodWidgetState extends State<ServanthoodWidget> {
                   child: Text(
                     editText,
                     style: TextStyle(
+                      fontFamily: "Montserrat",
                       fontSize: 14.0,
                     ),
                   )));
@@ -321,7 +429,7 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
             for (int i = 0; i < widget.people.length; i++) {
               InputChip actionChip = InputChip(
                 label: Text(widget.people[i]),
-                elevation: 10,
+                elevation: 5,
                 pressElevation: 5,
                 shadowColor: Colors.lightBlue,
                 onDeleted: () {
@@ -341,8 +449,7 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
               InputChip actionChip = InputChip(
                   label: Text(widget.people[i]),
                   elevation: 10,
-                  pressElevation: 5,
-                  shadowColor: Colors.lightBlue);
+                  pressElevation: 5);
               chips.add(actionChip);
             }
           }
@@ -398,7 +505,10 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
     return ListTile(
       title: Text('Prayer',
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.w500, color: Colors.black)),
+              fontFamily: "Montserrat",
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.black)),
       subtitle: Container(
         child: Column(
           children: <Widget>[buildChips(), inner],
