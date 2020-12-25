@@ -63,6 +63,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
+            leading: Container(),
             centerTitle: true,
             title: const Text(
               'Profile',

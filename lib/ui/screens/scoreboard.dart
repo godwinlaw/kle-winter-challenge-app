@@ -27,6 +27,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
+            leading: Container(),
             centerTitle: true,
             title: Text("Scoreboard",
                 style:
