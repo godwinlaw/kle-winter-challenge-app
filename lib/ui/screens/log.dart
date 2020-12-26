@@ -58,7 +58,8 @@ class _LogWidgetState extends State<LogWidget> {
         await FirebaseRepository().getServanthoodCommitment(user.uid);
     List<dynamic> prayerList =
         await FirebaseRepository().getPrayerList(user.uid);
-    this.prayerList = prayerList.map((e) => e.toString()).toList();
+    this.prayerList =
+        prayerList == null ? [] : prayerList.map((e) => e.toString()).toList();
     this.thisWeekVerse = await FirebaseRepository().getVerseOfTheWeek();
     this.currentWeek = FirebaseRepository().getCurrentWeekNumber();
   }
