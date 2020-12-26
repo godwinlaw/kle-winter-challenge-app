@@ -37,6 +37,7 @@ class _ScoreboardWidgetState extends State<ScoreboardWidget> {
             bottom: TabBar(
                 unselectedLabelColor: Colors.black,
                 indicatorColor: Colors.black,
+                labelPadding: EdgeInsets.symmetric(horizontal: 15),
                 labelColor: Colors.white,
                 labelStyle: TextStyle(
                     fontFamily: "Montserrat", fontWeight: FontWeight.bold),
