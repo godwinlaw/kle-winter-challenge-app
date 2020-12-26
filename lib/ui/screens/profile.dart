@@ -112,6 +112,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               // ),
               individualTile(ServanthoodWidget()),
               individualTile(_PrayerChipWidget()),
+              SizedBox(height: 20),
               _logOutWidget(context)
             ])),
       );
@@ -219,7 +220,7 @@ Widget _logOutWidget(BuildContext context) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => LoginPage()));
     },
-    color: Colors.white,
+    color: Color.fromRGBO(178, 59, 59, 1),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -234,7 +235,7 @@ Widget _logOutWidget(BuildContext context) {
               style: TextStyle(
                 fontFamily: "Montserrat",
                 fontSize: 20,
-                color: Colors.black,
+                color: Colors.white,
               ),
             ),
           )
@@ -343,8 +344,8 @@ class _ServanthoodWidgetState extends State<ServanthoodWidget> {
   FutureBuilder _servanthoodTextField() => FutureBuilder<String>(
       future: firebaseRepository.getServanthoodCommitment(user.uid),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          editText = snapshot.data;
+        if (snapshot.connectionState == ConnectionState.done) {
+          editText = snapshot.data == null ? '' : snapshot.data;
           if (_isEditingText)
             return Column(children: [
               TextField(
@@ -423,9 +424,9 @@ class _PrayerChipWidgetState extends State<_PrayerChipWidget> {
   FutureBuilder buildChips() => FutureBuilder<List<String>>(
       future: firebaseRepository.getPrayerList(user.uid),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.done) {
           List<Widget> chips = new List();
-          widget.people = snapshot.data;
+          widget.people = snapshot.data == null ? [] : snapshot.data;
           if (isEditing) {
             for (int i = 0; i < widget.people.length; i++) {
               InputChip actionChip = InputChip(

@@ -222,7 +222,9 @@ class FirebaseRepository {
         .get()
         .then((document) {
       if (document.exists) {
-        commitment = document.get(SERVANTHOOD_FIELD);
+        commitment = document.data().containsKey(SERVANTHOOD_FIELD)
+            ? document.get(SERVANTHOOD_FIELD)
+            : '';
       }
     });
 
@@ -239,7 +241,9 @@ class FirebaseRepository {
         .get()
         .then((document) {
       if (document.exists) {
-        commitment = document.get(PRAYER_FIELD).cast<String>();
+        commitment = document.data().containsKey(PRAYER_FIELD)
+            ? document.get(PRAYER_FIELD).cast<String>()
+            : [];
       }
     });
 
