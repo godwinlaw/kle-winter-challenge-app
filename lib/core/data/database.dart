@@ -1,6 +1,3 @@
-// Import the firebase_core plugin
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:tuple/tuple.dart';
@@ -44,6 +41,13 @@ class FirebaseRepository {
   /// CREATE FUNCTIONS
 
   void createUserWithGoogleProvider(auth.User firebaseUser) {
+    firestore.collection(USERS_COLLECTION).doc(firebaseUser.uid).set({
+      FULL_NAME_FIELD: firebaseUser.displayName,
+      PROFILE_URL_FIELD: firebaseUser.photoURL
+    });
+  }
+
+  void createUserWithAppleProvider(auth.User firebaseUser) {
     firestore.collection(USERS_COLLECTION).doc(firebaseUser.uid).set({
       FULL_NAME_FIELD: firebaseUser.displayName,
       PROFILE_URL_FIELD: firebaseUser.photoURL

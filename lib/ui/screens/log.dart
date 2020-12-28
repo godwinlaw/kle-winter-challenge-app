@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:winterchallenge/core/data/database.dart';
 import 'package:tuple/tuple.dart';

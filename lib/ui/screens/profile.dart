@@ -37,7 +37,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   @override
   void initState() {
     super.initState();
-    // TODO: init with user data
+
     name = user.displayName;
     isBrother = true;
     photoUrl = user.photoURL;
@@ -106,7 +106,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               //       trailing: IconButton(
               //         icon: Icon(Icons.arrow_forward_ios_rounded),
               //         onPressed: () {
-              //           // TODO: display memory verses in another page
               //         },
               //       )),
               // ),
@@ -255,23 +254,6 @@ Container individualTile(Widget tileChild) {
       child: tileChild,
     ),
   );
-}
-
-Future<ImageProvider> _getProfilePic() async {
-  ImageProvider result;
-  await firebaseRepository.getUserDetails(user.uid).then((value) {
-    bool isBrother = value["gender"] == Gender.Male;
-    print("gender: " + value["gender"]);
-    if (user.photoURL != null) {
-      print("google photo");
-      result = NetworkImage(user.photoURL);
-    } else {
-      print("default photo");
-      result = AssetImage(
-          isBrother ? "assets/default_man.jpeg" : "assets/default_woman.jpeg");
-    }
-  });
-  return result;
 }
 
 FutureBuilder _profilePic() => FutureBuilder<Gender>(
